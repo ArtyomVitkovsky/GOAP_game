@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374c1e31f52b51a4f8f4e0ddc8a16d35, type: 3}
+  m_Name: ConfigsInstaller
+  m_EditorClassIdentifier: 
+  playerMovementBaseStats: {fileID: 11400000, guid: ce787fb8d01a0db449c2090981ad8dc4, type: 2}
+  vehicleMovementBaseStats: {fileID: 11400000, guid: aa5bb98474c712e43b851c5b93b4ff84, type: 2}
+  transmissionSettingsPanelsConfigsSet: {fileID: 11400000, guid: e7960369b667a2b4db81bab0c39704c2, type: 2}
+  reputationSetup: {fileID: 11400000, guid: 085fcb24792fa35478b9aa0081de3529, type: 2}
+  fractionReputationSetupSet: {fileID: 11400000, guid: fd8e7f6a28ba8d64b89cf65c08cc5d68, type: 2}
+  goalsSet: {fileID: 11400000, guid: 5901495adc0a66b478923dbc723e5a16, type: 2}
+  actionsSet: {fileID: 11400000, guid: a2b265255f00acf449c0bcf4ad177f7b, type: 2}

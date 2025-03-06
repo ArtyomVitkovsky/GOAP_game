@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 283ec73151d4470c9ddd189a5dc347ca, type: 3}
+  m_Name: SuspensionSpringSettingsPanelSetup
+  m_EditorClassIdentifier: 
+  settingsType: 0
+  spring:
+    settingName: Spring
+    defaultValue: 5000
+    minValue: 1000
+    maxValue: 100000
+  damper:
+    settingName: Damper
+    defaultValue: 100
+    minValue: 500
+    maxValue: 10000
+  targetPosition:
+    settingName: Target Position
+    defaultValue: 0.5
+    minValue: 0
+    maxValue: 1

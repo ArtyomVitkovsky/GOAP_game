@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8576be2d45c44e9e82eb9236d1608d1e, type: 3}
+  m_Name: FractionReputationSetupSet
+  m_EditorClassIdentifier: 
+  fractionReputationSetups:
+  - {fileID: 11400000, guid: ff67af5e381a7524697098ae1ff996a5, type: 2}
+  - {fileID: 11400000, guid: df52177be624bb54b9fef66c8f7851db, type: 2}

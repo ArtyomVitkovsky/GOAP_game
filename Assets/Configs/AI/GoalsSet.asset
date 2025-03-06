@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0f648c737c14743bf105045b6ff7351, type: 3}
+  m_Name: GoalsSet
+  m_EditorClassIdentifier: 
+  baseGoals:
+  - {fileID: 11400000, guid: 90a09cc66655bea43aff6f8fb6321bb3, type: 2}
+  - {fileID: 11400000, guid: 718909fde361d5a428ea43428bd5cad8, type: 2}
+  - {fileID: 11400000, guid: 4d1c53a623c2d3246bf59a93d4f0b05f, type: 2}

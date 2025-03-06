@@ -1,0 +1,209 @@
+using System;
+using Cinemachine;
+using Cysharp.Threading.Tasks;
+using Game.CameraSystem;
+using Game.Car.Components;
+using Game.Car.Installers;
+using Game.Character;
+using Game.NpcSystem;
+using Services;
+using Services.InteractionService;
+using Services.PlayerControlService;
+using UnityEngine;
+using Zenject;
+
+namespace Game.Car
+{
+    [Serializable]
+    public enum Axel
+    {
+        Front = 0,
+        Rear = 1,
+    }
+
+    [Serializable]
+    public struct Wheel
+    {
+        public GameObject view;
+        public WheelCollider collider;
+        public Axel axel;
+    }
+
+    public enum VehicleCharacterPositionType
+    {
+        EnterExit = 0,
+        DriverSeat = 1,
+        PassengerSeat = 2
+    }
+
+    public enum VehicleOwnerType
+    {
+        Player = 0,
+        NPC = 1
+    }
+    
+    public class VehicleSystem : MonoBehaviour, IControllable, IInteractable
+    {
+        [Inject] private DiContainer diContainer;
+        
+        [Inject] private IBootstrapService bootstrapService;
+        [Inject] private IPlayerControlService playerControlService;
+        [Inject] private ICameraService cameraService;
+        [Inject] private PlayerVehicleControlComponent playerControlComponent;
+        [Inject] private NpcVehicleControlComponent npcControlComponent;
+        [Inject] private VehicleTransmissionComponent transmissionComponent;
+        [Inject] private VehicleCharacterPositionsComponent сharacterPositionsComponent;
+        
+        [Inject(Id = VehicleSystemInstaller.VEHICLE_TRANSFORM)]
+        private Transform transform;
+        
+        private VehicleTurretsComponent _turretsComponent;
+        
+        private VehicleActionsProvider vehicleActionsProvider;
+        
+        private bool exitTimeOutEnded;
+        
+        private bool isInitialized;
+
+        private VehicleControlComponent vehicleControlComponent;
+        private IWorldMember owner;
+        private VehicleOwnerType ownerType;
+        
+        private float notGroundedTime = 0;
+
+        public Transform ControllableTransform => transform;
+        public Transform InteractableTransform => transform;
+
+        public IWorldMember Owner => owner;
+
+        
+        public bool IsActive { get; private set; }
+
+        public bool IsNpcControlPossible()
+        {
+            var isGrounded = npcControlComponent.IsAllWheelsGrounded() || 
+                             npcControlComponent.IsHalfOfWheelsGrounded();
+
+            if (isGrounded)
+            {
+                notGroundedTime = 0;
+            }
+            else
+            {
+                notGroundedTime += Time.deltaTime;
+            }
+
+            return notGroundedTime < 5;
+        }
+
+        private void Awake()
+        {
+            npcControlComponent.Stop();
+            playerControlComponent.Stop();
+        }
+
+        private async UniTask InitializeForPlayer()
+        {
+            if (isInitialized) return;
+            
+            await bootstrapService.BootstrapTask;
+
+            transmissionComponent.Initialize();
+            
+            vehicleActionsProvider = playerControlService.VehicleActionsProvider;
+            vehicleActionsProvider.OnExitAction += OnExitAction;
+        }
+
+        public void Control()
+        {
+            if (!IsActive) return;
+            
+            vehicleControlComponent.Control();
+        }
+
+        public void SetActive(bool isActive)
+        {
+            IsActive = isActive;
+        }
+
+        public void ResetPosition()
+        {
+            transform.position = new Vector3(transform.position.x, transform.position.y + 10, transform.position.z);
+            transform.eulerAngles = Vector3.zero;
+        }
+        
+        public void Interact(IWorldMember interactionInitiator)
+        {
+            owner = interactionInitiator;
+            сharacterPositionsComponent.SetCharacterTo(owner, VehicleCharacterPositionType.DriverSeat);
+
+            if (interactionInitiator is CharacterSystem characterSystem)
+            {
+                owner = characterSystem;
+                ownerType = VehicleOwnerType.Player;
+                vehicleControlComponent = playerControlComponent;
+
+                OnPlayerInteract();
+            }
+            else if (interactionInitiator is NpcCharacter npc)
+            {
+                ownerType = VehicleOwnerType.NPC;
+                npcControlComponent.Setup(npc.NavigationComponent);
+                npc.NavigationComponent.VehicleControl = npcControlComponent;
+                vehicleControlComponent = npcControlComponent;
+            }
+            
+            vehicleControlComponent.Initialize();
+        }
+
+        private async UniTask OnPlayerInteract()
+        {
+            await InitializeForPlayer();
+            
+            playerControlService.SetCurrentControllable(this);
+            cameraService.RequestCameraTypeChange(GameCameraType.Vehicle);
+
+            _turretsComponent = diContainer.Resolve<VehiclePlayerTurretsComponent>();
+            _turretsComponent.Initialize(owner);
+            
+            ExitTimeout();
+        }
+        
+        private void OnExitAction()
+        {
+            if (!exitTimeOutEnded) return;
+            
+            playerControlService.ResetCurrentControllable();
+            cameraService.RequestCameraTypeChange(GameCameraType.Character);
+            
+            OwnerExit();
+
+            exitTimeOutEnded = false;
+        }
+
+        private void OwnerExit()
+        {
+            сharacterPositionsComponent.SetCharacterTo(owner, VehicleCharacterPositionType.EnterExit);
+            vehicleControlComponent.Dispose();
+            vehicleControlComponent = null;
+        }
+
+        public void Exit()
+        {
+            OwnerExit();
+        }
+
+
+        public bool Stop()
+        {
+            return vehicleControlComponent.Stop();
+        }
+
+        private async UniTask ExitTimeout()
+        {
+            await UniTask.Delay(1000);
+
+            exitTimeOutEnded = true;
+        }
+    }
+}
