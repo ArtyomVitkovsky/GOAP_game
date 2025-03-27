@@ -12,10 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e23b1587661141d3a909121529b9a520, type: 3}
   m_Name: PlayerMovementBaseStats
   m_EditorClassIdentifier: 
-  moveSpeed: 100
-  sprintSpeed: 200
-  jumpMultiplier: 5
-  maxVelocity: 1
-  maxSprintVelocity: 3
-  groundedCheckerDistance: 0.55
-  groundDrag: 5
+  moveSpeed: 4
+  sprintSpeed: 8
+  maxBounces: 0
+  maxSlopeAngle: 0
+  slideLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  gravity: -9
+  jumpForce: 4
+  jumpTimeout: 0.1
+  fallTimeout: 0.15
+  lookMultiplier: 1
+  rigLookSpeed: 10
+  cameraVerticalClampMin: {x: -70, y: 65}
+  cameraVerticalClampMax: {x: -25, y: 40}
+  maxOffset: -3
+  minOffset: 0
+  zoomSpeed: 5
