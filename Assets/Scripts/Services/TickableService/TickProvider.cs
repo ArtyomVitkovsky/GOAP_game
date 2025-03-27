@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Zenject;
 
 namespace Services.TickableService
@@ -15,6 +16,11 @@ namespace Services.TickableService
         private void FixedUpdate()
         {
             tickableService.FixedUpdate();
+        }
+
+        private void LateUpdate()
+        {
+            tickableService.LateUpdate();
         }
     }
 }
