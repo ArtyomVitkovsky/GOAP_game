@@ -22,8 +22,8 @@ namespace AI.Action
 
         public override void Complete(NpcCharacter npcCharacter, WorldState worldState)
         {
-            worldState.SetEffect(WorldStateKeys.IS_AT_TARGET, true);
-            worldState.SetEffect(WorldStateKeys.IS_HAS_TARGET, false);
+            worldState.SetEffect(WorldStateKeysEnum.IS_AT_TARGET, true);
+            worldState.SetEffect(WorldStateKeysEnum.IS_HAS_TARGET, false);
         }
 
         public override void Fail(NpcCharacter npcCharacter, WorldState worldState)

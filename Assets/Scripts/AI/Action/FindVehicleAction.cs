@@ -17,6 +17,8 @@ namespace AI.Action
 
         public override ActionPerformResult Perform(NpcCharacter npcCharacter, WorldState worldState)
         {
+            worldState.GetClosestVehicle(out worldState.ClosestVehicle, out var distance);
+            
             if (!npcCharacter.NavigateTo(worldState.ClosestVehicle, stopDistance))
             {
                 return ActionPerformResult.Performing;
@@ -32,7 +34,7 @@ namespace AI.Action
 
         public override void Fail(NpcCharacter npcCharacter, WorldState worldState)
         {
-            worldState.SetEffect(WorldStateKeys.IS_CAN_USE_VEHICLE, false);
+            worldState.SetEffect(WorldStateKeysEnum.IS_CAN_USE_VEHICLE, false);
         }
     }
 }

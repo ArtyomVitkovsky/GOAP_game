@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7701e5ac1c9b489ba279bf89eee369f4, type: 3}
   m_Name: PatrolGoal
   m_EditorClassIdentifier: 
+  id: Patrol
   desiredState:
   - Key: 12
     Value: 1
   validationParameters: []
+  defaultPriority: 0
   minimumPriority: 1
   maximumPriority: 2

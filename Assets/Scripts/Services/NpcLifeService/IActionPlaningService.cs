@@ -14,12 +14,12 @@ namespace Services.NpcLifeService
     public class ActionPlaningTask
     {
         public Guid Id;
-        public Goal Goal;
+        public ActorGoal Goal;
         public ActorAction[] Actions;
         public WorldState WorldState;
         public Queue<ActorAction> Plan;
 
-        public ActionPlaningTask(Guid id, Goal goal, ActorAction[] actions, WorldState worldState)
+        public ActionPlaningTask(Guid id, ActorGoal goal, ActorAction[] actions, WorldState worldState)
         {
             Id = id;
             Goal = goal;
@@ -34,7 +34,7 @@ namespace Services.NpcLifeService
 
         public void Bootstrap();
         
-        public void EnqueueActionPlaningTask(Guid id, GoapAgent goapAgent, Goal goal);
+        public void EnqueueActionPlaningTask(Guid id, GoapAgent goapAgent, ActorGoal actorGoal);
     }
     
     public class ActionPlaningServiceInstaller : Installer<ActionPlaningServiceInstaller>
@@ -64,13 +64,13 @@ namespace Services.NpcLifeService
             StartProcessing();
         }
 
-        public void EnqueueActionPlaningTask(Guid id, GoapAgent goapAgent, Goal goal)
+        public void EnqueueActionPlaningTask(Guid id, GoapAgent goapAgent, ActorGoal actorGoal)
         {
             planingTasks ??= new Queue<ActionPlaningTask>();
 
             var planingTask = new ActionPlaningTask(
                 id,
-                goal,
+                actorGoal,
                 goapAgent.Actions.ToArray(),
                 goapAgent.WorldState
             );

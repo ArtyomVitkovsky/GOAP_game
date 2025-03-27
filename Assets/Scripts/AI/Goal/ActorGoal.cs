@@ -5,8 +5,10 @@ using UnityEngine;
 
 namespace AI.Goal
 {
-    public abstract class Goal : ScriptableObject
+    public abstract class ActorGoal : ScriptableObject
     {
+        [SerializeField] protected string id;
+        
         [SerializeField] protected Fact[] desiredState;
         [SerializeField] protected Fact[] validationParameters;
 
@@ -14,6 +16,8 @@ namespace AI.Goal
         [SerializeField] protected int defaultPriority;
         [SerializeField] protected int minimumPriority;
         [SerializeField] protected int maximumPriority;
+
+        public string Id => id;
         
         public Dictionary<string, bool> DesiredState
         {

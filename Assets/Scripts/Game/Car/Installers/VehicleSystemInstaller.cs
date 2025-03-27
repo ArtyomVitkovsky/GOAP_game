@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cinemachine;
 using UnityEngine;
 using UnityEngine.AI;
@@ -7,6 +9,25 @@ using Zenject;
 
 namespace Game.Car.Installers
 {
+    public enum DirectionType
+    {
+        Forward = 0,
+        ForwardRight = 1,
+        ForwardLeft = 2,
+        Back = 3,
+        BackRight = 4,
+        BackLeft = 5,
+        Right = 6,
+        Left = 7
+    }
+
+    [Serializable]
+    public class ObstacleCheckerOrigin
+    {
+        public DirectionType direction;
+        public Transform[] origins;
+    }
+    
     public class VehicleSystemInstaller : MonoInstaller
     {
         public const string TURRETS_POINTER = "TURRETS_POINTER";
@@ -22,7 +43,7 @@ namespace Game.Car.Installers
         [Header("Vehicle")]
         [SerializeField] private VehicleSystem vehicleSystem;
         [SerializeField] private Transform transform;
-        [SerializeField] private Transform obstacleTriggerOrigin;
+        [SerializeField] private ObstacleCheckerOrigin[] obstacleTriggerOrigin;
         [SerializeField] private Rigidbody rigidbody;
         [SerializeField] private List<Wheel> wheels;
         [SerializeField] private List<VehicleCharacterPosition> positions;
@@ -43,7 +64,10 @@ namespace Game.Car.Installers
             Container.BindInstance(transform).WithId(VEHICLE_TRANSFORM);
             Container.BindInstance(turrets).WithId(VEHICLE_TURRETS);
             Container.BindInstance(positions).WithId(VEHICLE_CHARACTER_POSITIONS);
-            Container.BindInstance(obstacleTriggerOrigin).WithId(VEHICLE_OBSTACLE_TRIGGER_ORIGIN);
+
+            var obstacleOrigins = 
+                obstacleTriggerOrigin.ToDictionary(v => v.direction, v => v.origins);
+            Container.BindInstance(obstacleOrigins).WithId(VEHICLE_OBSTACLE_TRIGGER_ORIGIN);
             
             VehicleTurretsComponentInstaller.Install(Container);
             PlayerVehicleControlComponentInstaller.Install(Container);

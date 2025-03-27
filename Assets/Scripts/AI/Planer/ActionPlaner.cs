@@ -16,12 +16,12 @@ public class PlanNode
 
 public class ActionPlaner
 {
-    public Queue<ActorAction> GetPlan(Goal goal, ActorAction[] actions, WorldState worldState)
+    public Queue<ActorAction> GetPlan(ActorGoal actorGoal, ActorAction[] actions, WorldState worldState)
     {
         Stopwatch sw = new Stopwatch();
         sw.Start();
         
-        var desiredState = goal.GetDesiredState();
+        var desiredState = actorGoal.GetDesiredState();
 
         var root = new PlanNode()
         {

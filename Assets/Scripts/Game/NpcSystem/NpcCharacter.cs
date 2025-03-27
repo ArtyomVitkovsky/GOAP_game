@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AI.Action;
 using AI.Goal;
@@ -14,7 +15,7 @@ using Zenject;
 
 namespace Game.NpcSystem
 {
-    public class NpcCharacter : MonoBehaviour, IWorldMember, IDamagable
+    public class NpcCharacter : MonoBehaviour, IWorldMember, IDamagable, IGoapContext
     {
         [Inject] private ITickableService tickableService;
         [Inject] private IActionPlaningService actionPlaningService;
@@ -42,7 +43,7 @@ namespace Game.NpcSystem
         public GoapAgent GoapAgent => goapAgent;
 
         public Transform Transform => transform;
-        public string Name { get; }
+        public string Name { get; set; }
 
         public Fraction Fraction => WorldState.Fraction;
         public void SetParent(Transform parent)
@@ -83,7 +84,7 @@ namespace Game.NpcSystem
         {
             healthComponent.UpdateHealthValue(-damageDealer.Damage);
 
-            WorldState.SetEffect(WorldStateKeys.IS_ENEMY_NEARBY, sensorsComponent.ScanFor(damageDealer.Sender));
+            WorldState.SetEffect(WorldStateKeysEnum.IS_ENEMY_NEARBY, sensorsComponent.ScanFor(damageDealer.Sender));
 
             moodComponent.UpdateCurrentMood(NpcMood.Aggressive);
         
@@ -109,7 +110,7 @@ namespace Game.NpcSystem
         {
             var isInteractionSuccessful = interactionComponent.TryToInteract(out Vehicle);
             
-            WorldState.SetEffect(WorldStateKeys.IS_HAS_VEHICLE, isInteractionSuccessful);
+            WorldState.SetEffect(WorldStateKeysEnum.IS_HAS_VEHICLE, isInteractionSuccessful);
 
             return isInteractionSuccessful;
         }
@@ -121,15 +122,18 @@ namespace Game.NpcSystem
                 return;
             }
             
-            navigationComponent.NavMeshAgent.agentTypeID = AgentTypeID.GetAgentTypeIDByName("Humanoid");
-            navigationComponent.NavMeshAgent.updateRotation = true;
-            navigationComponent.NavMeshAgent.updatePosition = true;
-            
             Vehicle.Exit();
+
+            navigationComponent.NavMeshAgent.agentTypeID = AgentTypeID.GetAgentTypeIDByName("Humanoid");
+            navigationComponent.NavMeshAgent.autoRepath = true;
+            navigationComponent.NavMeshAgent.updateRotation = false;
+            navigationComponent.NavMeshAgent.updatePosition = false;
+            navigationComponent.NavMeshAgent.ResetPath();
+            navigationComponent.NavMeshAgent.SetDestination(navigationComponent.Target);
             
             Vehicle = null;
             
-            WorldState.SetEffect(WorldStateKeys.IS_HAS_VEHICLE, false);
+            WorldState.SetEffect(WorldStateKeysEnum.IS_HAS_VEHICLE, false);
         }
 
         public bool StopVehicle()
@@ -139,6 +143,8 @@ namespace Game.NpcSystem
 
         public bool ControlVehicle()
         {
+            if (Vehicle == null) return false;
+            
             var isControlPossible = Vehicle.IsNpcControlPossible();
             navigationComponent.VehicleControl.Control();
             

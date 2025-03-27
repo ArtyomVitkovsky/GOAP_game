@@ -71,6 +71,8 @@ namespace Game.Car
         
         private float notGroundedTime = 0;
 
+        public string ownerName;
+
         public Transform ControllableTransform => transform;
         public Transform InteractableTransform => transform;
 
@@ -93,7 +95,7 @@ namespace Game.Car
                 notGroundedTime += Time.deltaTime;
             }
 
-            return notGroundedTime < 5;
+            return notGroundedTime < 10;
         }
 
         private void Awake()
@@ -104,8 +106,6 @@ namespace Game.Car
 
         private async UniTask InitializeForPlayer()
         {
-            if (isInitialized) return;
-            
             await bootstrapService.BootstrapTask;
 
             transmissionComponent.Initialize();
@@ -134,16 +134,14 @@ namespace Game.Car
         
         public void Interact(IWorldMember interactionInitiator)
         {
-            owner = interactionInitiator;
-            сharacterPositionsComponent.SetCharacterTo(owner, VehicleCharacterPositionType.DriverSeat);
-
             if (interactionInitiator is CharacterSystem characterSystem)
             {
-                owner = characterSystem;
+                interactionInitiator = characterSystem;
                 ownerType = VehicleOwnerType.Player;
                 vehicleControlComponent = playerControlComponent;
+                vehicleControlComponent.Initialize();
 
-                OnPlayerInteract();
+                OnPlayerInteract(interactionInitiator);
             }
             else if (interactionInitiator is NpcCharacter npc)
             {
@@ -151,12 +149,15 @@ namespace Game.Car
                 npcControlComponent.Setup(npc.NavigationComponent);
                 npc.NavigationComponent.VehicleControl = npcControlComponent;
                 vehicleControlComponent = npcControlComponent;
+                vehicleControlComponent.Initialize();
             }
             
-            vehicleControlComponent.Initialize();
+            owner = interactionInitiator;
+            ownerName = owner.Name;
+            сharacterPositionsComponent.SetCharacterTo(interactionInitiator, VehicleCharacterPositionType.DriverSeat);
         }
 
-        private async UniTask OnPlayerInteract()
+        private async UniTask OnPlayerInteract(IWorldMember interactionInitiator)
         {
             await InitializeForPlayer();
             
@@ -164,7 +165,7 @@ namespace Game.Car
             cameraService.RequestCameraTypeChange(GameCameraType.Vehicle);
 
             _turretsComponent = diContainer.Resolve<VehiclePlayerTurretsComponent>();
-            _turretsComponent.Initialize(owner);
+            _turretsComponent.Initialize(interactionInitiator);
             
             ExitTimeout();
         }
@@ -186,6 +187,8 @@ namespace Game.Car
             сharacterPositionsComponent.SetCharacterTo(owner, VehicleCharacterPositionType.EnterExit);
             vehicleControlComponent.Dispose();
             vehicleControlComponent = null;
+            owner = null;
+            ownerName = null;
         }
 
         public void Exit()

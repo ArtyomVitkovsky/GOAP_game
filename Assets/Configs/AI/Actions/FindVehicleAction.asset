@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f3a4c43449d4214bb574b51851d8bb9, type: 3}
   m_Name: FindVehicleAction
   m_EditorClassIdentifier: 
+  id: FindVehicle
   preconditions:
   - Key: 5
     Value: 1
@@ -22,4 +23,4 @@ MonoBehaviour:
   costMultiplier: 1
   minimumCost: 1
   maximumCost: 100000
-  stopDistance: 20
+  stopDistance: 100

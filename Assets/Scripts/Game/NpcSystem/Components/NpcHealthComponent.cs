@@ -30,7 +30,7 @@ namespace Game.NpcSystem.Components
             
             healthText.SetText($"{WorldState.Health} / {WorldState.MaxHealth}");
 
-            WorldState.SetEffect(WorldStateKeys.IS_DAMAGED, WorldState.Health < WorldState.MaxHealth);
+            WorldState.SetEffect(WorldStateKeysEnum.IS_DAMAGED, WorldState.Health < WorldState.MaxHealth);
         }
 
         private void HealthLookAtPlayer()

@@ -116,8 +116,8 @@ namespace Game.NpcSystem.Components
                 
                 WorldState.VehiclePositions?.Clear();
                 WorldState.VehiclePositions = vehicles.Select(v => v.transform.position).ToList();
-                WorldState.SetEffect(WorldStateKeys.IS_CAN_USE_VEHICLE, vehicles.Count > 0);
-                WorldState.SetEffect(WorldStateKeys.IS_SEE_VEHICLE, true);
+                WorldState.SetEffect(WorldStateKeysEnum.IS_CAN_USE_VEHICLE, vehicles.Count > 0);
+                WorldState.SetEffect(WorldStateKeysEnum.IS_SEE_VEHICLE, true);
             }
             catch (Exception e)
             {

@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace AI.Goal.Generic
 {
-    [CreateAssetMenu(menuName = "AI/Goal/PatrolGoal", fileName = "PatrolGoal")]
-    public class PatrolGoal : Goal
+    [CreateAssetMenu(menuName = "AI/Goal/FollowGoal", fileName = "FollowGoal")]
+    public class FollowActorGoal : ActorGoal
     {
         public override int Priority(WorldState worldState)
         {

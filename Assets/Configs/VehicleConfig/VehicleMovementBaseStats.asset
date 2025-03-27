@@ -12,8 +12,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6d95e0acffe459ba1f14e55f7509ba7, type: 3}
   m_Name: VehicleMovementBaseStats
   m_EditorClassIdentifier: 
-  moveSpeed: 2000
-  rotationSpeed: 10
-  maxSteerAngle: 30
+  moveSpeed: 3000
+  rotationSpeed: 100
+  maxSteerAngle: 60
   stopBrakeTorque: 9000
   brakeTorque: 0
+  steerAdjustment: 10
+  reverseTargetAngle: 180
+  excludeObstacleLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  obstacleDistance:
+  - direction: 0
+    distance: 0.75
+  - direction: 1
+    distance: 0.5
+  - direction: 2
+    distance: 0.5
+  - direction: 3
+    distance: 0.75
+  - direction: 4
+    distance: 0.5
+  - direction: 5
+    distance: 0.5
+  - direction: 6
+    distance: 0.75
+  - direction: 7
+    distance: 0.75

@@ -17,43 +17,41 @@ using Zenject;
 //     }
 // }
 
-public class GoapAgent
+public class GoapAgent : IGoapAgent<NpcCharacter>
 {
     private IActionPlaningService ActionPlaningService;
-    
-    private List<Goal> Goals;
-    
-    private Goal CurrentGoal;
-    private Queue<ActorAction> CurrentPlan;
-    
-    private ActorAction CurrentAction;
-
-    public List<ActorAction> Actions;
-    public WorldState WorldState;
-    public NpcCharacter Character;
-    
-    private Guid planingTaskId;
 
     public GoapAgent(NpcCharacter character, WorldState worldState, IActionPlaningService actionPlaningService)
     {
         ActionPlaningService = actionPlaningService;
-        Character = character;
+        Context = character;
         WorldState = worldState;
-
-        WorldState.OnWorldStateChanged += ReBuild;
+        
+        ActionPlaningService.OnPlanBuildComplete += OnPlanBuildComplete;
     }
 
-    public void AddGoals(Goal[] goals)
+    public WorldState WorldState { get; protected set; }
+    
+    public NpcCharacter Context { get; protected set; }
+    public List<ActorGoal> Goals { get; protected set; }
+    public List<ActorAction> Actions { get; protected set; }
+    public ActorGoal CurrentGoal { get; protected set; }
+    public Queue<ActorAction> CurrentPlan { get; protected set; }
+    public ActorAction CurrentAction { get; protected set; }
+
+    public Guid PlaningTaskId { get; protected set; }
+
+    public void AddGoals(ActorGoal[] goals)
     {
-        Goals ??= new List<Goal>();
+        Goals ??= new List<ActorGoal>();
         Goals.AddRange(goals);
     }
 
-    public void RemoveGoal(Goal goal)
+    public void RemoveGoal(ActorGoal actorGoal)
     {
-        if (Goals != null && Goals.Contains(goal))
+        if (Goals != null && Goals.Contains(actorGoal))
         {
-            Goals.Remove(goal);
+            Goals.Remove(actorGoal);
         }
     }
 
@@ -71,26 +69,31 @@ public class GoapAgent
         }
     }
 
-    public virtual void ReBuild()
+    public void StartWorldStateListening()
     {
-        if (Goals == null || Goals.Count == 0) return;
+        WorldState.OnWorldStateChanged += () => { ReBuild(false); };
+    }
+
+    public virtual void ReBuild(bool force)
+    {
+        if (Goals == null || Goals.Count == 0 && !force) return;
         
         var goal = GetMostImportantGoal();
 
+        BuildPlanFor(goal);
+    }
+
+    public void BuildPlanFor(ActorGoal goal)
+    {
         CurrentGoal = goal;
-        BuildPlanFor(CurrentGoal);
+
+        PlaningTaskId = Guid.NewGuid();
+        ActionPlaningService.EnqueueActionPlaningTask(PlaningTaskId, this, goal);
     }
 
-    protected virtual void BuildPlanFor(Goal goal)
+    public void OnPlanBuildComplete(ActionPlaningTask planingTask)
     {
-        ActionPlaningService.OnPlanBuildComplete += OnPlanBuildComplete;
-        planingTaskId = Guid.NewGuid();
-        ActionPlaningService.EnqueueActionPlaningTask(planingTaskId, this, goal);
-    }
-
-    protected virtual void OnPlanBuildComplete(ActionPlaningTask planingTask)
-    {
-        if (planingTaskId == planingTask.Id)
+        if (PlaningTaskId == planingTask.Id)
         {
             CurrentPlan = planingTask.Plan;
         }
@@ -104,9 +107,9 @@ public class GoapAgent
         ProcessAction(CurrentAction);
     }
 
-    protected virtual void ProcessAction(ActorAction action)
+    public void ProcessAction(ActorAction action)
     {
-        switch (action.Perform(Character, WorldState))
+        switch (action.Perform(Context, WorldState))
         {
             case ActionPerformResult.Performing:
             {
@@ -114,34 +117,34 @@ public class GoapAgent
             }
             case ActionPerformResult.Completed:
             {
-                CurrentAction.Complete(Character, WorldState);
+                CurrentAction.Complete(Context, WorldState);
                 CurrentPlan.Dequeue();
                 break;
             }
             case ActionPerformResult.Failed:
             {
-                CurrentAction.Fail(Character, WorldState);
+                CurrentAction.Fail(Context, WorldState);
                 CurrentPlan.Dequeue();
                 break;
             }
         }
     }
 
-    private Goal GetMostImportantGoal()
+    public ActorGoal GetMostImportantGoal()
     {
-        Goal mostImportantGoal = null;
+        ActorGoal mostImportantActorGoal = null;
 
         foreach (var goal in Goals)
         {
             if (!goal.IsValid(WorldState)) continue;
 
-            if (!mostImportantGoal || 
-                goal.Priority(WorldState) > mostImportantGoal.Priority(WorldState))
+            if (!mostImportantActorGoal || 
+                goal.Priority(WorldState) > mostImportantActorGoal.Priority(WorldState))
             {
-                mostImportantGoal = goal;
+                mostImportantActorGoal = goal;
             }
         }
 
-        return mostImportantGoal;
+        return mostImportantActorGoal;
     }
 }

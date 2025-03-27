@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90a27962151947e2a4576bc8ca12d375, type: 3}
   m_Name: PatrolAction
   m_EditorClassIdentifier: 
+  id: Patrol
   preconditions: []
   effects:
   - Key: 12

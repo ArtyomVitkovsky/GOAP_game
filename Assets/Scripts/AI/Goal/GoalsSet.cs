@@ -6,10 +6,10 @@ namespace AI.Goal
     [CreateAssetMenu(menuName = "AI/Goal/GoalsSet", fileName = "GoalsSet")]
     public class GoalsSet : ScriptableObject
     {
-        [SerializeField] private Goal[] baseGoals;
-        [SerializeField] private Goal[] subordinateGoals;
+        [SerializeField] private ActorGoal[] baseGoals;
+        [SerializeField] private ActorGoal[] subordinateGoals;
 
-        public Goal[] BaseGoals => baseGoals;
-        public Goal[] SubordinateGoals => subordinateGoals;
+        public ActorGoal[] BaseGoals => baseGoals;
+        public ActorGoal[] SubordinateGoals => subordinateGoals;
     }
 }

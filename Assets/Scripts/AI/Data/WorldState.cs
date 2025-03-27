@@ -58,16 +58,12 @@ public class WorldState
 
     public void SetEffect(string key, bool value)
     {
-        // if (effects[key] == value) return;
-        
         effects[key] = value;
         OnWorldStateChanged?.Invoke();
     }
     
     public void SetEffect(WorldStateKeysEnum key, bool value)
     {
-        // if (effects[key] == value) return;
-        
         effects[WorldStateKeys.TypeToKeys[key]] = value;
         OnWorldStateChanged?.Invoke();
     }

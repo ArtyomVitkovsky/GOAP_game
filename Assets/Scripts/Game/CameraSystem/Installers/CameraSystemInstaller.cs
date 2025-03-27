@@ -9,14 +9,13 @@ namespace Game.CameraSystem.Installers
 {
     public class CameraSystemInstaller : MonoInstaller
     {
-        public const string MAX_OFFSET = "MAX_OFFSET";
-        public const string MIN_OFFSET = "MIN_OFFSET";
-        public const string ZOOM_SPEED = "ZOOM_SPEED";
         public const string GAMEPLAY_CAMERA = "GAMEPLAY_CAMERA";
         public const string CAMERA_RAYCAST_POINTER = "CAMERA_RAYCAST_POINTER";
         public const string RAYCAST_LAYER_MASK = "RAYCAST_LAYER_MASK";
 
         [Inject] private SignalBus signalBus;
+        
+        [SerializeField] private CameraSystem cameraSystem;
         
         [Header("CameraSetup")]
         [SerializeField] private Camera camera;
@@ -25,17 +24,14 @@ namespace Game.CameraSystem.Installers
         [Header("Raycast")]
         [SerializeField] private Transform cameraRaycastPointer;
         [SerializeField] private LayerMask layerMask;
-        
-        [Header("Zoom")]
-        [SerializeField] private float maxOffset;
-        [SerializeField] private float minOffset;
-        [SerializeField] private float zoomSpeed;
 
         public override void InstallBindings()
         {
             BindInstances();
 
             BindComponents();
+
+            Container.BindInstance(cameraSystem);
         }
 
         private void BindComponents()
@@ -52,10 +48,6 @@ namespace Game.CameraSystem.Installers
             
             Container.BindInstance(cameraRaycastPointer).WithId(CAMERA_RAYCAST_POINTER);
             Container.BindInstance(layerMask).WithId(RAYCAST_LAYER_MASK);
-
-            Container.BindInstance(maxOffset).WithId(MAX_OFFSET);
-            Container.BindInstance(minOffset).WithId(MIN_OFFSET);
-            Container.BindInstance(zoomSpeed).WithId(ZOOM_SPEED);
         }
     }
 }

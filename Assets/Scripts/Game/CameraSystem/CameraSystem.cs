@@ -80,6 +80,8 @@ namespace Game.CameraSystem
 
         private CameraSetup currentCamera;
 
+        public CameraSetup CurrentCamera => currentCamera;
+
         private void Awake()
         {
             Initialize();

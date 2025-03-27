@@ -14,6 +14,8 @@ namespace Game.Car.Components
 
         [Inject] protected VehicleMovementBaseStats _vehicleMovementBaseStats;
 
+        protected abstract bool IsInitialized { get; set; }
+
         public Vector2 MoveVector;
         public bool HandBreak;
         
@@ -86,6 +88,11 @@ namespace Game.Car.Components
 
         public virtual void Control()
         {
+            if (!IsInitialized)
+            {
+                return;
+            }
+            
             WheelsControl(MoveVector);
         }
 

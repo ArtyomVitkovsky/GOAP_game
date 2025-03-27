@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fcb1bf8336c4f14ba62d242d52f9df3, type: 3}
   m_Name: HealAction
   m_EditorClassIdentifier: 
+  id: Heal
   preconditions:
   - Key: 3
     Value: 1

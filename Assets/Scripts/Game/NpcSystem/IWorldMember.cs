@@ -5,7 +5,7 @@ namespace Game.NpcSystem
     public interface IWorldMember
     {
         public Transform Transform { get; }
-        public string Name { get; }
+        public string Name { get; set; }
         public Fraction Fraction { get; }
 
         public void SetParent(Transform parent);

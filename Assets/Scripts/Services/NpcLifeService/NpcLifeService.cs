@@ -1,106 +1,54 @@
 ﻿using System.Collections.Generic;
 using AI.Action;
 using AI.Goal;
-using AI.Goal.Generic;
 using Cysharp.Threading.Tasks;
 using Game.NpcSystem;
+using Services.TickableService;
 using UnityEngine;
 using Zenject;
 
 namespace Services.NpcLifeService
 {
-    public class GroupGoapAgent : GoapAgent
-    {
-        private GoalsSet goalsSet;
-        private ActionsSet actionsSet;
-
-        private List<GoapAgent> members;
-
-        public GroupGoapAgent(
-            NpcCharacter character,
-            WorldState worldState,
-            IActionPlaningService actionPlaningService,
-            GoalsSet goalsSet,
-            ActionsSet actionsSet,
-            int capacity)
-            : base(character, worldState, actionPlaningService)
-        {
-            this.goalsSet = goalsSet;
-            this.actionsSet = actionsSet;
-            
-            members = new List<GoapAgent>(capacity);
-        }
-
-        public void AddMember(GoapAgent member)
-        {
-            members.Add(member);
-            member.AddGoals(goalsSet.SubordinateGoals);
-            member.AddActions(actionsSet.SubordinateActions);
-            
-            member.WorldState.SetEffect(WorldStateKeysEnum.IS_HAS_LEADER, true);
-            
-            WorldState.OnWorldStateChanged += ReBuild;
-        }
-
-        public override void ReBuild()
-        {
-            base.ReBuild();
-
-            for (var i = 0; i < members.Count; i++)
-            {
-                members[i].ReBuild();
-            }
-        }
-
-        protected override void BuildPlanFor(Goal goal)
-        {
-            base.BuildPlanFor(goal);
-        }
-
-        protected override void OnPlanBuildComplete(ActionPlaningTask planingTask)
-        {
-            base.OnPlanBuildComplete(planingTask);
-        }
-
-        public override void ProcessPlan()
-        {
-            base.ProcessPlan();
-
-            for (var i = 0; i < members.Count; i++)
-            {
-                members[i].ProcessPlan();
-            }
-        }
-
-        protected override void ProcessAction(ActorAction action)
-        {
-            base.ProcessAction(action);
-        }
-    }
-
     public class NpcLifeService : INpcLifeService
     {
+        [Inject] private ITickableService tickableService;
         [Inject] private IActionPlaningService actionPlaningService;
 
         [Inject] private GoalsSet goalsSet;
         [Inject] private ActionsSet actionsSet;
 
-        private List<GoapAgent> goapAgents;
+        private List<IGoapAgent<IGoapContext>> goapAgents;
 
-        public List<NpcCampPoint> camps;
+        private TickableEntity tickableEntity;
 
-        public List<IInterestPoint> interestPoints;
+        private List<NpcCampPoint> camps;
+
+        private List<IInterestPoint> interestPoints;
+        
 
         public void Bootstrap()
         {
             camps = new List<NpcCampPoint>();
             interestPoints = new List<IInterestPoint>();
+            goapAgents = new List<IGoapAgent<IGoapContext>>();
+            
+            tickableEntity = new TickableEntity(ProcessAgents);
+            tickableService.AddFixedUpdateTickable(tickableEntity);
+        }
+
+        private void ProcessAgents()
+        {
+            for (int i = 0; i < goapAgents.Count; i++)
+            {
+                goapAgents[i].ProcessPlan();;
+            }
         }
 
         public void RegisterCampPoint(NpcCampPoint campPoint)
         {
             camps.Add(campPoint);
-            CreateExplorationGroupFor(campPoint, Random.Range(0f, 10f));
+            CreateExplorationGroupFor(campPoint, Random.Range(0f, 3f));
+            SetupFreeCitizens(campPoint);
         }
 
         public void RegisterInterestPoint(IInterestPoint interestPoint)
@@ -108,35 +56,59 @@ namespace Services.NpcLifeService
             interestPoints.Add(interestPoint);
         }
 
+        private void SetupFreeCitizens(NpcCampPoint campPoint)
+        {
+            var freeCitizens = campPoint.GetFreeCitizens();
+            for (int i = 0; i < freeCitizens.Count; i++)
+            {
+                freeCitizens[i].GoapAgent.AddGoals(goalsSet.BaseGoals);
+                freeCitizens[i].GoapAgent.AddActions(actionsSet.BaseActions);
+                freeCitizens[i].GoapAgent.ReBuild(false);
+            }
+        }
+
         private async UniTask CreateExplorationGroupFor(NpcCampPoint campPoint, float delay)
         {
-            await UniTask.Delay((int)(delay * 1000f));
-
             var group = campPoint.GetRandomGroup();
             if (group.Count == 0) return;
+            
+            await UniTask.Delay((int)(delay * 1000f));
 
             var points = interestPoints.FindAll(p => p != campPoint as IInterestPoint);
             var randomInterestPoint = points[Random.Range(0, points.Count)];
 
-            var leader = group[0];
-            var groupAgent = new GroupGoapAgent(
-                leader,
-                leader.WorldState,
-                actionPlaningService,
-                goalsSet,
-                actionsSet,
-                group.Count);
+            var groupAgent = CreateGroupAgent(group);
 
+            goapAgents.Add(groupAgent);
+
+            var positionOffset = new Vector3(10, 0, 10);
+            groupAgent.WorldState.Target = randomInterestPoint.Transform.position;
+            
+            for (var i = 0; i < group.Count; i++)
+            {
+                var offset = positionOffset * (i + 1);
+                group[i].WorldState.Target = randomInterestPoint.Transform.position + offset;
+            }
+            
+            groupAgent.SetEffectForGroup(WorldStateKeysEnum.IS_HAS_TARGET, true);
+        }
+
+        private GroupGoapAgent CreateGroupAgent(List<NpcCharacter> group)
+        {
+            var groupContext = new GroupGoapContext();
+            
             for (var i = 0; i < group.Count; i++)
             {
                 var member = group[i];
-                groupAgent.AddMember(member.GoapAgent);
+                groupContext.Members.Add(member.GoapAgent);
             }
+            
+            var groupAgent = new GroupGoapAgent(actionPlaningService, groupContext, new WorldState());
 
             groupAgent.AddActions(actionsSet.BaseActions);
             groupAgent.AddGoals(goalsSet.BaseGoals);
-            groupAgent.WorldState.Target = randomInterestPoint.Transform.position;
-            groupAgent.WorldState.SetEffect(WorldStateKeys.IS_HAS_TARGET, true);
+
+            return groupAgent;
         }
     }
 }

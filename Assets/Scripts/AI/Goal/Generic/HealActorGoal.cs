@@ -4,7 +4,7 @@ using UnityEngine;
 namespace AI.Goal.Generic
 {
     [CreateAssetMenu(menuName = "AI/Goal/HealGoal", fileName = "HealGoal")]
-    public class HealGoal : Goal
+    public class HealActorGoal : ActorGoal
     {
         public override int Priority(WorldState worldState)
         {

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 408b4f67f41846b58d1008dd1f7d56ad, type: 3}
+  m_Name: FollowByVehicleAction
+  m_EditorClassIdentifier: 
+  id: Follow_Vehicle
+  preconditions:
+  - Key: 7
+    Value: 1
+  effects:
+  - Key: 10
+    Value: 1
+  validationParameters:
+  - Key: 16
+    Value: 1
+  - Key: 6
+    Value: 1
+  costMultiplier: 10
+  minimumCost: 5
+  maximumCost: 10000
+  stopDistance: 2000
+  followDistance: 5000
+  brakeFollowDistance: 20000

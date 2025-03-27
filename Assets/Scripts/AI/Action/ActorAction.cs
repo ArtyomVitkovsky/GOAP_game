@@ -22,6 +22,8 @@ namespace AI.Action
     
     public abstract class ActorAction : ScriptableObject
     {
+        [SerializeField] protected string id;
+        
         [SerializeField] protected Fact[] preconditions;
         [SerializeField] protected Fact[] effects;
         [SerializeField] protected Fact[] validationParameters;
@@ -31,6 +33,8 @@ namespace AI.Action
         [SerializeField] protected int minimumCost;
         [SerializeField] protected int maximumCost;
 
+        public string Id => id;
+        
         public Dictionary<string, bool> Preconditions
         {
             get

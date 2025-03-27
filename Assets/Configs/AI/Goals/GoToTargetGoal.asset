@@ -12,11 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 237b2f112deb430597b28312a73d065e, type: 3}
   m_Name: GoToTargetGoal
   m_EditorClassIdentifier: 
+  id: ToTarget
   desiredState:
   - Key: 10
     Value: 1
   validationParameters:
   - Key: 8
     Value: 1
+  defaultPriority: 0
   minimumPriority: 1
   maximumPriority: 2

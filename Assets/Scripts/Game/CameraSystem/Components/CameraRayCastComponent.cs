@@ -37,6 +37,10 @@ namespace Game.CameraSystem.Components
             {
                 cameraRaycastPointer.position = rayHit.point;
             }
+            else
+            {
+                cameraRaycastPointer.position = camera.transform.forward * 100;
+            }
         }
     }
 }

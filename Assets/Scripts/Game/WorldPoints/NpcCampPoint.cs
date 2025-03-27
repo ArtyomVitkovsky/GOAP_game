@@ -51,6 +51,7 @@ namespace Game.NpcSystem
         [SerializeField] private int weight;
 
         private List<NpcCharacter> citizens;
+        private List<NpcCharacter> explorationGroup;
 
         public Transform Transform => transform;
         public int Weight => weight;
@@ -86,6 +87,8 @@ namespace Game.NpcSystem
                 diContainer.InstantiatePrefabForComponent<NpcCharacter>(
                     npcPrefab, position, Quaternion.identity, spawnPoint.Transform
                 );
+
+            newCitizen.Name = $"NPC_number_{citizens.Count}";
         
             newCitizen.Initialize(fractionSetup.Fraction);
             citizens.Add(newCitizen);
@@ -93,10 +96,11 @@ namespace Game.NpcSystem
 
         public List<NpcCharacter> GetRandomGroup()
         {
-            var groupSize = (int)(citizens.Count * 0.3f);
+            // var groupSize = (int)(citizens.Count * 0.3f);
+            var groupSize = (int)(citizens.Count);
             groupSize = Math.Clamp(groupSize, 0, vehicles.Count);
 
-            var group = new List<NpcCharacter>(groupSize);
+            explorationGroup = new List<NpcCharacter>(groupSize);
             var usedIndices = new List<int>(groupSize);
         
             for (int i = 0; i < groupSize; i++)
@@ -111,10 +115,15 @@ namespace Game.NpcSystem
                 usedIndices.Add(randomIndex);
             
                 var groupMember = citizens[randomIndex];
-                group.Add(groupMember);
+                explorationGroup.Add(groupMember);
             }
 
-            return group;
+            return explorationGroup;
+        }
+
+        public List<NpcCharacter> GetFreeCitizens()
+        {
+            return citizens.FindAll(c => !explorationGroup.Contains(c));
         }
     }
 }

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c2c597e6b774931bbd15466e1b8d94d, type: 3}
   m_Name: GoToTargetByVehicleAction
   m_EditorClassIdentifier: 
+  id: ToTarget_Vehicle
   preconditions:
   - Key: 7
     Value: 1

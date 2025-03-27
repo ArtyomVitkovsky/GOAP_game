@@ -19,12 +19,12 @@ namespace AI.Action
 
         public override void Complete(NpcCharacter npcCharacter, WorldState worldState)
         {
-            worldState.SetEffect(WorldStateKeys.IS_DAMAGED, worldState.Health < worldState.MaxHealth);
+            worldState.SetEffect(WorldStateKeysEnum.IS_DAMAGED, worldState.Health < worldState.MaxHealth);
         }
 
         public override void Fail(NpcCharacter npcCharacter, WorldState worldState)
         {
-            worldState.SetEffect(WorldStateKeys.IS_DAMAGED, worldState.Health < worldState.MaxHealth);
+            worldState.SetEffect(WorldStateKeysEnum.IS_DAMAGED, worldState.Health < worldState.MaxHealth);
         }
     }
 }
