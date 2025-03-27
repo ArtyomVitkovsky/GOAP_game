@@ -18,6 +18,7 @@ namespace Game.Character
         [Inject] private ICameraService cameraService;
         
         [Inject] private CharacterControlComponent characterControl;
+        [Inject] private CharacterAnimationComponent animationComponent;
         [Inject] private CharacterInteractionComponent interactionComponent;
 
         private Transform parent;
@@ -25,9 +26,9 @@ namespace Game.Character
         public Transform ControllableTransform => characterControl.Transform;
         public bool IsActive { get; private set; }
 
-        public Transform Transform { get; }
+        public Transform Transform => transform;
         
-        public string Name { get; }
+        public string Name { get; set; }
         public Fraction Fraction { get; }
         public void SetParent(Transform parent)
         {
@@ -56,6 +57,7 @@ namespace Game.Character
             playerControlService.SetCurrentControllable(this);
             
             characterControl.Initialize();
+            animationComponent.Initialize();
             interactionComponent.Initialize(this);
         }
 

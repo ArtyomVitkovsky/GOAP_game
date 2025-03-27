@@ -79,7 +79,7 @@ namespace Game.Character.Components
     
         public void OnSprint(InputAction.CallbackContext context)
         {
-            Sprint = context.performed;
+            Sprint = context.started || context.performed;
         }
 
         public void OnAim(InputAction.CallbackContext context)

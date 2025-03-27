@@ -1,4 +1,5 @@
-﻿using Game.Character.Installers;
+﻿using Game.Car.Installers;
+using Game.Character.Installers;
 using Game.NpcSystem;
 using Services.InteractionService;
 using Services.TickableService;
@@ -18,7 +19,7 @@ namespace Game.Character.Components
         protected IWorldMember interactor;
 
         protected IInteractable interactable;
-        private RaycastHit[] interactionRayHits;
+        private Collider[] interactionRayHits;
 
         private bool isActive;
 
@@ -27,7 +28,7 @@ namespace Game.Character.Components
             this.interactor = interactor;
             
             tickableService.AddFixedUpdateTickable(new TickableEntity(CastInteractionRadius));
-            interactionRayHits = new RaycastHit[32];
+            interactionRayHits = new Collider[32];
         }
 
         public void SetActive(bool isActive)
@@ -37,7 +38,7 @@ namespace Game.Character.Components
         
         protected virtual void CastInteractionRadius()
         {
-            Debug.DrawRay(OriginPoint.position, OriginPoint.forward * InteractionSetup.radius, Color.blue);
+            // DebugExtension.DrawDebugSphere(OriginPoint.position, InteractionSetup.radius, Color.green);
 
             if (!isActive)
             {
@@ -46,12 +47,11 @@ namespace Game.Character.Components
             }
             
             var hitsCount =
-                Physics.SphereCastNonAlloc(
+                Physics.OverlapSphereNonAlloc(
                     OriginPoint.position,
                     InteractionSetup.radius,
-                    OriginPoint.forward,
                     interactionRayHits,
-                    InteractionSetup.radius);
+                    InteractionSetup.layerMask);
 
             if (hitsCount > 0)
             {

@@ -1,6 +1,9 @@
-﻿using Configs.PlayerConfig;
+﻿using Cinemachine;
+using Configs.PlayerConfig;
 using Game.CameraSystem;
+using Game.CameraSystem.Components;
 using Game.CameraSystem.Installers;
+using Game.Car.Installers;
 using Game.Character.Installers;
 using Services.PlayerControlService;
 using Services.TickableService;
@@ -20,16 +23,23 @@ namespace Game.Character.Components
     public class CharacterControlComponent
     {
         [Inject] private IPlayerControlService playerControlService;
-        [Inject] private ITickableService tickableService;
         [Inject] private ICameraService cameraService;
 
-        [Inject] private PlayerMovementBaseStats playerMovementBaseStats;
+        [Inject] private PlayerMovementBaseStats movementStats;
 
-        [Inject(Id = CharacterSystemInstaller.CHARACTRER_RIGIDBODY)]
-        private Rigidbody rigidbody;
+        [Inject] private CameraZoomComponent cameraZoomComponent;
 
-        [Inject(Id = CharacterSystemInstaller.CHARACTRER_COLLIDER)]
-        private CapsuleCollider capsuleCollider;
+        [Inject(Id = CharacterSystemInstaller.CHARACTRER_CONTROLLER)]
+        private CharacterController characterController;
+
+        [Inject(Id = CharacterSystemInstaller.CAMERA_FOLLOW_TARGET)]
+        private Transform cameraFollowTarget;
+
+        [Inject(Id = CharacterSystemInstaller.CHARACTER_GUN_PLACEMENT)]
+        private Transform gunPlacement;
+
+        [Inject(Id = CharacterSystemInstaller.HEAD_AIM)]
+        private Transform headAim;
 
         [Inject(Id = CharacterSystemInstaller.CHARACTRER_VIEW)]
         private Transform view;
@@ -40,13 +50,24 @@ namespace Game.Character.Components
         [Inject(Id = CameraSystemInstaller.GAMEPLAY_CAMERA)]
         private Camera camera;
 
-        private Quaternion targetLookRotation;
-        private Quaternion targetViewRotation;
+        private CinemachineExternalCamera externalCamera;
 
-        private RaycastHit groundRaycastHit;
+        private float cameraRotation;
+        private float bodyRotation;
+
+        private Quaternion gunRotation;
+
+        private Collider[] ground = new Collider[1];
+        private Vector3 moveVector;
+        private float verticalVelocity = 0;
+        private float jumpTimeoutDelta;
+        private float fallTimeoutDelta;
+
+        public Vector3 Gravity => new Vector3(0.0f, verticalVelocity, 0.0f);
+
         private PlayerActionsProvider PlayerActionsProvider => playerControlService.PlayerActionsProvider;
 
-        public Transform Transform => rigidbody.transform;
+        public Transform Transform => characterController.transform;
 
         public void Initialize()
         {
@@ -58,8 +79,10 @@ namespace Game.Character.Components
 
             ProcessMovement();
             ProcessJump();
-            ProcessGroundDrag();
+            ProcessGravity();
             ProcessRotation();
+
+            Move();
         }
 
         private void OnAimStart()
@@ -74,115 +97,108 @@ namespace Game.Character.Components
 
         private void ProcessMovement()
         {
-            if (PlayerActionsProvider.Jump || !IsGrounded()) return;
-            if (PlayerActionsProvider.MoveVector.x == 0 && PlayerActionsProvider.MoveVector.y == 0) return;
-
             var speed = PlayerActionsProvider.Sprint
-                ? playerMovementBaseStats.SprintSpeed
-                : playerMovementBaseStats.MoveSpeed;
+                ? movementStats.SprintSpeed
+                : movementStats.MoveSpeed;
 
-            var maxVelocity = PlayerActionsProvider.Sprint
-                ? playerMovementBaseStats.MaxSprintVelocity
-                : playerMovementBaseStats.MaxVelocity;
+            var forward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
+            var right = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
 
             var moveDirection = new Vector3(PlayerActionsProvider.MoveVector.x, 0, PlayerActionsProvider.MoveVector.y);
-            var moveVector = rigidbody.transform.TransformDirection(moveDirection);
-
-            rigidbody.AddForce(moveVector * speed, ForceMode.Force);
-            rigidbody.velocity = Vector3.ClampMagnitude(rigidbody.velocity, maxVelocity);
+            moveVector = forward * moveDirection.z + right * moveDirection.x;
+            moveVector *= speed;
         }
 
-        private void ProcessGroundDrag()
+        private void ProcessGravity()
         {
-            rigidbody.drag = IsGrounded() ? playerMovementBaseStats.GroundDrag : 0;
+            if (IsGrounded())
+            {
+                fallTimeoutDelta = movementStats.FallTimeout;
+            }
+            else if (fallTimeoutDelta <= 0)
+            {
+                verticalVelocity += movementStats.Gravity * Time.deltaTime;
+            }
+
+            if (fallTimeoutDelta >= 0.0f)
+            {
+                fallTimeoutDelta -= Time.deltaTime;
+            }
         }
 
         private void ProcessJump()
         {
-            if (!PlayerActionsProvider.Jump || !IsGrounded()) return;
+            if (IsGrounded())
+            {
+                if (PlayerActionsProvider.Jump && jumpTimeoutDelta <= 0.0f)
+                {
+                    verticalVelocity = movementStats.JumpForce;
+                }
 
-            rigidbody.AddForce(Vector3.up * playerMovementBaseStats.JumpMultiplier, ForceMode.Impulse);
+                if (jumpTimeoutDelta >= 0.0f)
+                {
+                    jumpTimeoutDelta -= Time.deltaTime;
+                }
+            }
+            else
+            {
+                jumpTimeoutDelta = movementStats.JumpTimeout;
+            }
         }
 
         private void ProcessRotation()
         {
-            RotateBody();
+            cameraRotation += PlayerActionsProvider.LookVector.y * movementStats.LookMultiplier;
+            bodyRotation = PlayerActionsProvider.LookVector.x * movementStats.LookMultiplier;
 
-            RotateView();
+            cameraRotation = Mathf.Clamp(
+                cameraRotation,
+                movementStats.CameraVerticalClamp(cameraZoomComponent.ZoomFactor).x,
+                movementStats.CameraVerticalClamp(cameraZoomComponent.ZoomFactor).y);
+
+            cameraFollowTarget.localRotation = Quaternion.Euler(-cameraRotation, 0f, 0f);
+
+            headAim.position = Vector3.Lerp(
+                headAim.position,
+                cameraRaycastPointer.position,
+                Time.deltaTime * movementStats.RigLookSpeed
+            );
+
+            characterController.transform.Rotate(Vector3.up * bodyRotation);
         }
 
-        private void RotateBody()
+        private void Move()
         {
-            if (PlayerActionsProvider.MoveVector.x != 0 ||
-                PlayerActionsProvider.MoveVector.y != 0 && !PlayerActionsProvider.Aim)
-            {
-                var targetPosition = new Vector3(
-                    cameraRaycastPointer.position.x,
-                    rigidbody.transform.position.y,
-                    cameraRaycastPointer.position.z
-                );
+            moveVector = CollideAndSlide(
+                moveVector,
+                characterController.transform.position,
+                0,
+                false
+                , moveVector
+            );
 
-                targetLookRotation = Quaternion.LookRotation(targetPosition - rigidbody.transform.position);
-            }
+            moveVector += CollideAndSlide(
+                Gravity,
+                characterController.transform.position + moveVector,
+                0,
+                true,
+                Gravity);
 
-            if (rigidbody.rotation != targetLookRotation && !PlayerActionsProvider.Aim)
-            {
-                rigidbody.MoveRotation(
-                    Quaternion.Slerp(rigidbody.rotation, targetLookRotation.normalized, Time.deltaTime * 10)
-                );
-            }
-
-            if (PlayerActionsProvider.Aim)
-            {
-                var targetPosition = new Vector3(
-                    cameraRaycastPointer.position.x,
-                    rigidbody.transform.position.y,
-                    cameraRaycastPointer.position.z
-                );
-                var aimDirection = (targetPosition - rigidbody.transform.position).normalized;
-                rigidbody.MoveRotation(Quaternion.LookRotation(aimDirection));
-            }
+            characterController.Move(
+                moveVector * Time.deltaTime +
+                new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
         }
 
-        private void RotateView()
-        {
-            if (PlayerActionsProvider.Aim)
-            {
-                view.transform.localRotation = Quaternion.identity;
-                return;
-            }
-
-            if (PlayerActionsProvider.MoveVector.x != 0 || PlayerActionsProvider.MoveVector.y != 0)
-            {
-                var sideDirection = rigidbody.transform.right * PlayerActionsProvider.MoveVector.x;
-                var frontDirection = rigidbody.transform.forward * PlayerActionsProvider.MoveVector.y;
-                targetViewRotation = Quaternion.LookRotation((sideDirection + frontDirection).normalized);
-            }
-
-            if (view.transform.rotation != targetViewRotation)
-            {
-                view.transform.rotation =
-                    Quaternion.Slerp(view.transform.rotation, targetViewRotation, Time.deltaTime * 10);
-            }
-        }
 
         private bool IsGrounded()
         {
-            var origin = rigidbody.transform.position;
-            var radius = capsuleCollider.radius;
-            var direction = -rigidbody.transform.up;
-
-            return Physics.SphereCast(
-                origin, radius, direction, out groundRaycastHit,
-                playerMovementBaseStats.GroundedCheckerDistance
-            );
+            return characterController.isGrounded;
         }
 
         public void SetActive(bool isActive)
         {
-            rigidbody.velocity = Vector3.zero;
-            rigidbody.isKinematic = !isActive;
-            capsuleCollider.enabled = isActive;
+            characterController.enabled = isActive;
+
 
             if (isActive)
             {
@@ -194,6 +210,94 @@ namespace Game.Character.Components
                 PlayerActionsProvider.OnAimStartAction -= OnAimStart;
                 PlayerActionsProvider.OnAimEndAction -= OnAimEnd;
             }
+        }
+
+        private Vector3 CollideAndSlide(
+            Vector3 velocity,
+            Vector3 position,
+            int depth,
+            bool gravityPass,
+            Vector3 velocityInit
+        )
+        {
+            if (depth > movementStats.MaxBounces)
+            {
+                return Vector3.zero;
+            }
+
+            var distance = velocity.magnitude + characterController.skinWidth;
+
+            if (CapsuleCastFromCharacter(velocity.normalized, distance, out var hit, movementStats.SlideLayerMask))
+            {
+                var snapToSurface = velocity.normalized * (hit.distance - characterController.skinWidth);
+                var leftOver = velocity - snapToSurface;
+                var angle = Vector3.Angle(Vector3.up, hit.normal);
+
+                if (snapToSurface.magnitude <= characterController.skinWidth)
+                {
+                    snapToSurface = Vector3.zero;
+                }
+
+                if (angle <= movementStats.MaxSlopeAngle)
+                {
+                    if (gravityPass)
+                    {
+                        return snapToSurface;
+                    }
+
+                    leftOver = ProjectAndScale(leftOver, hit.normal);
+                }
+                else
+                {
+                    var scale = 1 - Vector3.Dot(
+                        new Vector3(hit.normal.x, 0, hit.normal.z).normalized,
+                        -new Vector3(velocityInit.x, 0, velocityInit.z).normalized
+                    );
+
+                    if (IsGrounded() && !gravityPass)
+                    {
+                        leftOver = ProjectAndScale(
+                            new Vector3(leftOver.x, 0, leftOver.z),
+                            new Vector3(hit.normal.x, 0, hit.normal.z)
+                        ).normalized;
+
+                        leftOver *= scale;
+                    }
+                    else
+                    {
+                        leftOver = ProjectAndScale(leftOver, hit.normal) * scale;
+                    }
+                }
+
+
+                return snapToSurface +
+                       CollideAndSlide(
+                           leftOver, position + snapToSurface, depth + 1, gravityPass, velocityInit
+                       );
+            }
+
+            return velocity;
+        }
+
+        private static Vector3 ProjectAndScale(Vector3 leftOver, Vector3 hitNormal)
+        {
+            var leftOverMagnitude = leftOver.magnitude;
+            leftOver = Vector3.ProjectOnPlane(leftOver, hitNormal).normalized;
+            leftOver *= leftOverMagnitude;
+            return leftOver;
+        }
+
+        private bool CapsuleCastFromCharacter(Vector3 direction, float maxDistance, out RaycastHit hit,
+            LayerMask layerMask)
+        {
+            float height = characterController.height;
+            float radius = characterController.radius;
+            Vector3 center = characterController.transform.position + characterController.center;
+
+            Vector3 bottom = center + Vector3.down * (height / 2 - radius);
+            Vector3 top = center + Vector3.up * (height / 2 - radius);
+
+            return Physics.CapsuleCast(bottom, top, radius, direction, out hit, maxDistance, layerMask);
         }
     }
 }
