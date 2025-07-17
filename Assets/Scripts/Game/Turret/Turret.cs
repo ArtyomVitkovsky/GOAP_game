@@ -52,6 +52,7 @@ namespace Game.Turret
             else
             {
                 tickableService.RemoveUpdateTickable(tickableEntity);
+                view.ResetRotation();
             }
         }
 

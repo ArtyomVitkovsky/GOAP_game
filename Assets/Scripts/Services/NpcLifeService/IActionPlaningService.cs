@@ -11,7 +11,7 @@ using Debug = UnityEngine.Debug;
 
 namespace Services.NpcLifeService
 {
-    public class ActionPlaningTask
+    public struct ActionPlaningTask
     {
         public Guid Id;
         public ActorGoal Goal;
@@ -25,6 +25,7 @@ namespace Services.NpcLifeService
             Goal = goal;
             Actions = actions;
             WorldState = worldState;
+            Plan = null;
         }
     }
     

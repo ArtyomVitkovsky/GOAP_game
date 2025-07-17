@@ -24,12 +24,15 @@ namespace Game.CameraSystem
             CameraSystems.Dequeue();
         }
 
-        public void RequestCameraTypeChange(GameCameraType gameCameraType)
+        public CameraSetup RequestCameraTypeChange(GameCameraType gameCameraType)
         {
             if (CameraSystems.TryPeek(out var cameraSystem))
             {
                 cameraSystem.ChangeCamera(gameCameraType);
+                return cameraSystem.CurrentCamera;
             }
+
+            return null;
         }
     }
 }

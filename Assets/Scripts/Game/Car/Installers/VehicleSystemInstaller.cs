@@ -37,6 +37,8 @@ namespace Game.Car.Installers
         public const string VEHICLE_TURRETS = "VEHICLE_TURRETS";
         public const string VEHICLE_CHARACTER_POSITIONS = "VEHICLE_CHARACTER_POSITIONS";
         public const string VEHICLE_OBSTACLE_TRIGGER_ORIGIN = "VEHICLE_OBSTACLE_TRIGGER_ORIGIN";
+        public const string VEHICLE_FOLLOW_TARGET = "VEHICLE_FOLLOW_TARGET";
+        public const string VEHICLE_LOOK_TARGET = "VEHICLE_LOOK_TARGET";
 
         // [SerializeField] private NavMeshAgent NavMeshAgent;
         
@@ -48,6 +50,10 @@ namespace Game.Car.Installers
         [SerializeField] private List<Wheel> wheels;
         [SerializeField] private List<VehicleCharacterPosition> positions;
         
+        [Header("Camera Targets")]
+        [SerializeField] private Transform followTarget;
+        [SerializeField] private Transform lookTarget;
+
         [Header("Turrets")]
         [SerializeField] private Transform turretsPointer;
         [SerializeField] private List<Turret.Turret> turrets;
@@ -64,6 +70,9 @@ namespace Game.Car.Installers
             Container.BindInstance(transform).WithId(VEHICLE_TRANSFORM);
             Container.BindInstance(turrets).WithId(VEHICLE_TURRETS);
             Container.BindInstance(positions).WithId(VEHICLE_CHARACTER_POSITIONS);
+            
+            Container.BindInstance(followTarget).WithId(VEHICLE_FOLLOW_TARGET);
+            Container.BindInstance(lookTarget).WithId(VEHICLE_LOOK_TARGET);
 
             var obstacleOrigins = 
                 obstacleTriggerOrigin.ToDictionary(v => v.direction, v => v.origins);

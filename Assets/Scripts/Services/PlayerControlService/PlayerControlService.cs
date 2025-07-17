@@ -42,7 +42,10 @@ namespace Services.PlayerControlService
 
         public void SetCurrentControllable(IControllable controllable)
         {
-            if (CurrentControllable == controllable) return;
+            if (CurrentControllable == controllable)
+            {
+                return;
+            }
             
             CurrentControllable?.SetActive(false);
 

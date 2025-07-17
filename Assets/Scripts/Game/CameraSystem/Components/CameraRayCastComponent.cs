@@ -31,7 +31,7 @@ namespace Game.CameraSystem.Components
             
             var ray = camera.ScreenPointToRay(rayOrigin);
             
-            Debug.DrawRay(ray.origin, ray.direction * 5, Color.blue);
+            Debug.DrawRay(ray.origin, ray.direction * 5, Color.magenta);
 
             if (Physics.Raycast(ray, out rayHit, float.PositiveInfinity, ~layerMask))
             {

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6d95e0acffe459ba1f14e55f7509ba7, type: 3}
   m_Name: VehicleMovementBaseStats
   m_EditorClassIdentifier: 
-  moveSpeed: 3000
+  moveSpeed: 10000
   rotationSpeed: 100
   maxSteerAngle: 60
   stopBrakeTorque: 9000

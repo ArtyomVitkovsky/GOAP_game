@@ -58,8 +58,9 @@ namespace Game.Character.Installers
         private void BindComponents()
         {
             CharacterControlComponentInstaller.Install(Container);
-            CharacterAnimationComponentInstaller.Install(Container);
+            // CharacterAnimationComponentInstaller.Install(Container);
             CharacterInteractionComponentInstaller.Install(Container);
+            CharacterCombatComponentInstaller.Install(Container);
         }
     }
 }

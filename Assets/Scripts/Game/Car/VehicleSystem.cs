@@ -57,6 +57,11 @@ namespace Game.Car
         [Inject(Id = VehicleSystemInstaller.VEHICLE_TRANSFORM)]
         private Transform transform;
         
+        [Inject(Id = VehicleSystemInstaller.VEHICLE_FOLLOW_TARGET)]
+        private Transform followTarget;
+        [Inject(Id = VehicleSystemInstaller.VEHICLE_LOOK_TARGET)]
+        private Transform lookTarget;
+        
         private VehicleTurretsComponent _turretsComponent;
         
         private VehicleActionsProvider vehicleActionsProvider;
@@ -162,7 +167,9 @@ namespace Game.Car
             await InitializeForPlayer();
             
             playerControlService.SetCurrentControllable(this);
-            cameraService.RequestCameraTypeChange(GameCameraType.Vehicle);
+            var camera = cameraService.RequestCameraTypeChange(GameCameraType.Vehicle);
+            camera.Cinemachine.Follow = followTarget;
+            camera.Cinemachine.LookAt = lookTarget;
 
             _turretsComponent = diContainer.Resolve<VehiclePlayerTurretsComponent>();
             _turretsComponent.Initialize(interactionInitiator);
@@ -174,10 +181,12 @@ namespace Game.Car
         {
             if (!exitTimeOutEnded) return;
             
-            playerControlService.ResetCurrentControllable();
-            cameraService.RequestCameraTypeChange(GameCameraType.Character);
+            _turretsComponent.Dispose();
             
             OwnerExit();
+            
+            playerControlService.ResetCurrentControllable();
+            cameraService.RequestCameraTypeChange(GameCameraType.Character);
 
             exitTimeOutEnded = false;
         }

@@ -23,10 +23,10 @@ MonoBehaviour:
   jumpForce: 4
   jumpTimeout: 0.1
   fallTimeout: 0.15
-  lookMultiplier: 1
+  lookMultiplier: 10
   rigLookSpeed: 10
   cameraVerticalClampMin: {x: -70, y: 65}
   cameraVerticalClampMax: {x: -25, y: 40}
-  maxOffset: -3
-  minOffset: 0
+  maxOffset: 7
+  minOffset: 4
   zoomSpeed: 5
