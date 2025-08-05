@@ -1405,7 +1405,7 @@ MonoBehaviour:
     spawnRadius: 1
   - transform: {fileID: 1101429403}
     spawnRadius: 1
-  maxPopulation: 7
+  maxPopulation: 0
   vehicles:
   - {fileID: 1196483542}
   - {fileID: 1185425034}
@@ -1981,7 +1981,7 @@ MonoBehaviour:
     spawnRadius: 1
   - transform: {fileID: 1384761712}
     spawnRadius: 1
-  maxPopulation: 7
+  maxPopulation: 0
   vehicles:
   - {fileID: 1262118334}
   - {fileID: 1628728864}
@@ -12337,7 +12337,7 @@ MonoBehaviour:
     spawnRadius: 1
   - transform: {fileID: 1038177989}
     spawnRadius: 1
-  maxPopulation: 7
+  maxPopulation: 10
   vehicles:
   - {fileID: 1835630829}
   - {fileID: 601395824}
@@ -22085,7 +22085,7 @@ MonoBehaviour:
     spawnRadius: 1
   - transform: {fileID: 1095348898}
     spawnRadius: 1
-  maxPopulation: 7
+  maxPopulation: 0
   vehicles:
   - {fileID: 678816261}
   - {fileID: 660614616}

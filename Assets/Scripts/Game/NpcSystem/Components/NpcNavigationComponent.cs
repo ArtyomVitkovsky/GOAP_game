@@ -46,6 +46,7 @@ namespace Game.NpcSystem.Components
             StopDistance = stopDistance;
             
             var distance = (NavMeshAgent.transform.position - Target).sqrMagnitude;
+            
             if (Target != point)
             {
                 target = point;

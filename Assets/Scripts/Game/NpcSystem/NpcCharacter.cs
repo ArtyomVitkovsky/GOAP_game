@@ -26,7 +26,7 @@ namespace Game.NpcSystem
         [Inject] private NpcNavigationComponent navigationComponent;
         [Inject] private NpcHealthComponent healthComponent;
         [Inject] private NpcSensorsComponent sensorsComponent;
-        // [Inject] private AgentComponent agentComponent;
+        
 
         [Inject(Id = NpcCharacterInstaller.HEALTH_VALUE)] 
         private int health;
@@ -46,6 +46,7 @@ namespace Game.NpcSystem
         public string Name { get; set; }
 
         public Fraction Fraction => WorldState.Fraction;
+        
         public void SetParent(Transform parent)
         {
             transform.parent = parent;
@@ -126,8 +127,8 @@ namespace Game.NpcSystem
 
             navigationComponent.NavMeshAgent.agentTypeID = AgentTypeID.GetAgentTypeIDByName("Humanoid");
             navigationComponent.NavMeshAgent.autoRepath = true;
-            navigationComponent.NavMeshAgent.updateRotation = false;
-            navigationComponent.NavMeshAgent.updatePosition = false;
+            navigationComponent.NavMeshAgent.updateRotation = true;
+            navigationComponent.NavMeshAgent.updatePosition = true;
             navigationComponent.NavMeshAgent.ResetPath();
             navigationComponent.NavMeshAgent.SetDestination(navigationComponent.Target);
             
