@@ -21,6 +21,8 @@ namespace Game.Car.Components
 
         public override void Dispose()
         {
+            vehicleActionsProvider = null;
+            IsInitialized = false;
         }
 
         public override void Control()

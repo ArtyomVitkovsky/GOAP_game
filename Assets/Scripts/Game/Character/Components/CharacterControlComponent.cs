@@ -53,7 +53,7 @@ namespace Game.Character.Components
         private CinemachineExternalCamera externalCamera;
 
         private float cameraRotation;
-        private float bodyRotation;
+        private Quaternion bodyRotation;
 
         private Quaternion gunRotation;
 
@@ -101,12 +101,20 @@ namespace Game.Character.Components
                 ? movementStats.SprintSpeed
                 : movementStats.MoveSpeed;
 
-            var forward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
-            var right = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
+            var input = PlayerActionsProvider.MoveVector;
 
-            var moveDirection = new Vector3(PlayerActionsProvider.MoveVector.x, 0, PlayerActionsProvider.MoveVector.y);
-            moveVector = forward * moveDirection.z + right * moveDirection.x;
-            moveVector *= speed;
+            var forward = camera.transform.forward;
+            var right = camera.transform.right;
+
+            forward.y = 0;
+            right.y = 0;
+            forward.Normalize();
+            right.Normalize();
+
+            Vector3 moveDir = (right * input.x + forward * input.y).normalized;
+
+            moveVector = moveDir * speed;
+            moveVector.y = verticalVelocity;
         }
 
         private void ProcessGravity()
@@ -148,23 +156,15 @@ namespace Game.Character.Components
 
         private void ProcessRotation()
         {
-            cameraRotation += PlayerActionsProvider.LookVector.y * movementStats.LookMultiplier;
-            bodyRotation = PlayerActionsProvider.LookVector.x * movementStats.LookMultiplier;
+            if (PlayerActionsProvider.MoveVector.sqrMagnitude > 0)
+            {
+                bodyRotation = Quaternion.Euler(camera.transform.rotation.eulerAngles.y * Vector3.up);
 
-            cameraRotation = Mathf.Clamp(
-                cameraRotation,
-                movementStats.CameraVerticalClamp(cameraZoomComponent.ZoomFactor).x,
-                movementStats.CameraVerticalClamp(cameraZoomComponent.ZoomFactor).y);
-
-            cameraFollowTarget.localRotation = Quaternion.Euler(-cameraRotation, 0f, 0f);
-
-            headAim.position = Vector3.Lerp(
-                headAim.position,
-                cameraRaycastPointer.position,
-                Time.deltaTime * movementStats.RigLookSpeed
-            );
-
-            characterController.transform.Rotate(Vector3.up * bodyRotation);
+                characterController.transform.rotation = Quaternion.Lerp(
+                    characterController.transform.rotation,
+                    bodyRotation,
+                    Time.deltaTime * movementStats.LookMultiplier);
+            }
         }
 
         private void Move()

@@ -5,6 +5,6 @@
         public void Bootstrap();
         public void EnqueueCameraSystem(CameraSystem cameraSystem);
         public void DequeueCameraSystem();
-        public void RequestCameraTypeChange(GameCameraType gameCameraType);
+        public CameraSetup RequestCameraTypeChange(GameCameraType gameCameraType);
     }
 }

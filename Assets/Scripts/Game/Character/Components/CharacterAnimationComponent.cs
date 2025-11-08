@@ -18,6 +18,9 @@ namespace Game.Character.Components
 
     public static class CharacterAnimationParameters
     {
+        public static string LeftFootIKWeight = "LeftFootIKWeight";
+        public static string RightFootIKWeight = "RightFootIKWeight";
+        
         public static int Idle = Animator.StringToHash("Idle");
         public static int Walk = Animator.StringToHash("Walk");
         public static int Run = Animator.StringToHash("Run");
@@ -34,13 +37,20 @@ namespace Game.Character.Components
         public static int CrouchIdle = Animator.StringToHash("CrouchIdle");
         public static int CrouchWalk = Animator.StringToHash("CrouchWalk");
         
-        public static string LeftFootIKWeight = "LeftFootIKWeight";
-        public static string RightFootIKWeight = "RightFootIKWeight";
+        public static int DrawingGun = Animator.StringToHash("DrawingGun");
+        public static int RifleIdle = Animator.StringToHash("RifleIdle");
+        public static int RifleAimingIdle = Animator.StringToHash("RifleAimingIdle");
+        public static int RifleAimingRun = Animator.StringToHash("RifleAimingRun");
     }
 
     public class CharacterAnimationStateMachine
     {
         public int GetState(PlayerActionsProvider playerActionsProvider)
+        {
+            return GetStateWithoutGun(playerActionsProvider);
+        }
+
+        private static int GetStateWithoutGun(PlayerActionsProvider playerActionsProvider)
         {
             if (playerActionsProvider.Sprint)
             {
@@ -65,7 +75,7 @@ namespace Game.Character.Components
                 Debug.LogError($"CrouchIdle");
                 return CharacterAnimationParameters.CrouchIdle;
             }
-            
+
             return CharacterAnimationParameters.Idle;
         }
     }

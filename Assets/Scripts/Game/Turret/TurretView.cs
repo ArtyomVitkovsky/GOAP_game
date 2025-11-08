@@ -34,6 +34,15 @@ namespace Game.Turret
             SetPointerPosition();
         }
 
+        public void ResetRotation()
+        {
+            var lookRotation = Quaternion.Euler(Vector3.zero);
+
+            body.rotation = lookRotation;
+
+            barrelAnchor.localRotation = lookRotation;
+        }
+
         private void RotateBodyToTarget(Transform target)
         {
             var targetPosition = new Vector3(target.position.x, body.position.y, target.position.z);

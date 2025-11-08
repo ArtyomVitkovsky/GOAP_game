@@ -22,8 +22,8 @@ namespace Services.NpcLifeService
     {
         private IActionPlaningService actionPlaningService;
 
-        private HashSet<GoapAgent> agentsCompletedAction;
-        private HashSet<GoapAgent> agentsCompletedPlan;
+        private HashSet<int> agentsPreparedForFinalAction;
+        private HashSet<int> agentsCompletedPlan;
         
         private bool isPlanBuilded;
 
@@ -146,8 +146,8 @@ namespace Services.NpcLifeService
             
             if (!Context.Members.Any(m => m.CurrentPlan == null || m.CurrentPlan.Count == 0))
             {
-                agentsCompletedAction = new HashSet<GoapAgent>();
-                agentsCompletedPlan = new HashSet<GoapAgent>();
+                agentsPreparedForFinalAction = new HashSet<int>();
+                agentsCompletedPlan = new HashSet<int>();
                 isPlanBuilded = true;
             }
         }
@@ -155,40 +155,17 @@ namespace Services.NpcLifeService
         public void ProcessPlan()
         {
             if (!isPlanBuilded) return;
-            
-            if (agentsCompletedAction.Count == Context.Members.Count)
-            {
-                agentsCompletedAction.Clear();
-                for (var i = 0; i < Context.Members.Count; i++)
-                {
-                    var action = Context.Members[i].CurrentPlan.Dequeue();
-                    action.Complete(Context.Members[i].Context, Context.Members[i].WorldState);
-                    
-                    if (Context.Members[i].CurrentPlan.Count == 0)
-                    {
-                        agentsCompletedPlan.Add(Context.Members[i]);
-                    }
-                }
-            }
-            
-            if (agentsCompletedPlan.Count == Context.Members.Count)
-            {
-                agentsCompletedPlan.Clear();
-                ReBuild(true);
-                return;
-            } 
 
             for (var i = 0; i < Context.Members.Count; i++)
             {
-                if (agentsCompletedAction.Contains(Context.Members[i]) || Context.Members[i].CurrentPlan.Count == 0)
+                if ((agentsPreparedForFinalAction.Contains(i) || Context.Members[i].CurrentPlan.Count == 0) &&
+                    agentsPreparedForFinalAction.Count != Context.Members.Count)
                 {
                     continue;
                 }
-                
-                var result = Context.Members[i]
-                    .CurrentPlan
-                    .Peek()
-                    .Perform(Context.Members[i].Context, Context.Members[i].WorldState);
+
+                var action = Context.Members[i].CurrentPlan.Peek();
+                var result = action.Perform(Context.Members[i].Context, Context.Members[i].WorldState);
 
                 if (result == ActionPerformResult.Failed)
                 {
@@ -201,9 +178,31 @@ namespace Services.NpcLifeService
 
                 if (result == ActionPerformResult.Completed)
                 {
-                    agentsCompletedAction.Add(Context.Members[i]);
+                    action.Complete(Context.Members[i].Context, Context.Members[i].WorldState);
+                    Context.Members[i].CurrentPlan.Dequeue();
+                    
+                    if (Context.Members[i].CurrentPlan.Count == 1)
+                    {
+                        agentsPreparedForFinalAction.Add(i);
+                    }
+
+                    if (Context.Members[i].CurrentPlan.Count == 0)
+                    {
+                        agentsCompletedPlan.Add(i);
+                    }
                 }
             }
+            
+            if (agentsPreparedForFinalAction.Count == Context.Members.Count)
+            {
+                agentsPreparedForFinalAction.Clear();
+            }
+            
+            if (agentsCompletedPlan.Count == Context.Members.Count)
+            {
+                agentsCompletedPlan.Clear();
+                ReBuild(true);
+            } 
         }
 
         public void ProcessAction(ActorAction action)

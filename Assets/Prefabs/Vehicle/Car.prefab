@@ -3192,6 +3192,8 @@ MonoBehaviour:
     type: 0
   - transform: {fileID: 1802159967903524607}
     type: 1
+  followTarget: {fileID: 9184789642892019400}
+  lookTarget: {fileID: 8411308923839697663}
   turretsPointer: {fileID: 3068832314963450904}
   turrets:
   - {fileID: 4728231534371102232}

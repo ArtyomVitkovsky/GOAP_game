@@ -17,7 +17,10 @@ namespace Game.Car.Components
         {
             var characterPosition = positions.FirstOrDefault(p => p.Type == type);
             
-            if (characterPosition == null) return;
+            if (characterPosition == null)
+            {
+                return;
+            }
 
             owner.SetParent(characterPosition.Transform);
             owner.Transform.position = characterPosition.Transform.position;

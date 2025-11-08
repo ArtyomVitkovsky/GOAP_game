@@ -50,6 +50,8 @@ namespace Game.Car.Components
                 turret.SetActive(isActive);
             }
         }
+
+        public virtual void Dispose(){}
     }
     
     public class VehiclePlayerTurretsComponent : VehicleTurretsComponent
@@ -108,6 +110,17 @@ namespace Game.Car.Components
                 averagePosition.z / turrets.Count);
 
             turretsPointer.position = averagePosition;
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            
+            tickableService.RemoveUpdateTickable(new TickableEntity(CalculateTurretsPointerPosition));
+            tickableService.RemoveUpdateTickable(new TickableEntity(ProcessAttack));
+            SetTurretsActive(false);
+            SetTurretsLookTarget(null);
+            _playerTurretsService.RemoveTurretsPointer();
         }
     }
 }

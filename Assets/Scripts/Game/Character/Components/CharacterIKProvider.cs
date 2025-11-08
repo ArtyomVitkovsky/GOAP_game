@@ -85,11 +85,15 @@ namespace Game.Character.Components
             }
             
             var leftFootDiff = leftFootHit.point.y - leftFootPosition.y;
-            var rightFootDiff = leftFootHit.point.y - leftFootPosition.y;
+            var rightFootDiff = rightFootHit.point.y - rightFootPosition.y;
             float averageDiff = (Mathf.Abs(leftFootDiff) + Mathf.Abs(rightFootDiff)) / 2;
             float averageHeight = -Mathf.Abs(leftFootHit.point.y - rightFootHit.point.y) / 2;
-            Vector3 targetPosition = new Vector3(0, averageHeight - averageDiff, 0);
-        
+
+            Vector3 minPosition = Vector3.Min(leftFootHit.point, rightFootHit.point);
+            minPosition = animator.transform.InverseTransformPoint(minPosition);
+            
+            Vector3 targetPosition = new Vector3(0, minPosition.y, 0);
+
             float smoothingFactor = 0.1f;
             animator.transform.localPosition = Vector3.Lerp(animator.transform.localPosition, targetPosition, smoothingFactor);
         }

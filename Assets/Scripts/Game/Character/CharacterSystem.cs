@@ -18,8 +18,9 @@ namespace Game.Character
         [Inject] private ICameraService cameraService;
         
         [Inject] private CharacterControlComponent characterControl;
-        [Inject] private CharacterAnimationComponent animationComponent;
+        // [Inject] private CharacterAnimationComponent animationComponent;
         [Inject] private CharacterInteractionComponent interactionComponent;
+        [Inject] private CharacterCombatComponent combatComponent;
 
         private Transform parent;
         
@@ -57,7 +58,7 @@ namespace Game.Character
             playerControlService.SetCurrentControllable(this);
             
             characterControl.Initialize();
-            animationComponent.Initialize();
+            // animationComponent.Initialize();
             interactionComponent.Initialize(this);
         }
 

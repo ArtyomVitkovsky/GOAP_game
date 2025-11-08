@@ -40,7 +40,7 @@ namespace Services.NpcLifeService
         {
             for (int i = 0; i < goapAgents.Count; i++)
             {
-                goapAgents[i].ProcessPlan();;
+                goapAgents[i].ProcessPlan();
             }
         }
 
