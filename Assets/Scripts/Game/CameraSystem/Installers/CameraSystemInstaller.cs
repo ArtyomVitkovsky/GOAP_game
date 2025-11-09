@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using Cinemachine;
 using Game.CameraSystem.Components;
-using Services.InteractionService;
 using UnityEngine;
 using Zenject;
 
@@ -38,7 +36,6 @@ namespace Game.CameraSystem.Installers
         {
             Container.BindInterfacesAndSelfTo<CameraZoomComponent>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<CameraRayCastComponent>().AsSingle().NonLazy();
-            Container.BindInterfacesAndSelfTo<CombatCameraComponent>().AsSingle().NonLazy();
         }
 
         private void BindInstances()

@@ -1,9 +1,5 @@
-﻿using System;
-using Cinemachine;
-using Game.Character.Components;
-using UnityEditor.Animations;
+﻿using Game.Character.Components;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
 using Zenject;
 
 namespace Game.Character.Installers

@@ -23,7 +23,10 @@ MonoBehaviour:
   jumpForce: 4
   jumpTimeout: 0.1
   fallTimeout: 0.15
-  lookMultiplier: 10
+  lookMultiplier: 5
+  lookSensitivity: {x: 1, y: 0.75}
+  lookSmoothing: {x: 3, y: 3}
+  clampInDegrees: {x: 360, y: 70}
   rigLookSpeed: 10
   cameraVerticalClampMin: {x: -70, y: 65}
   cameraVerticalClampMax: {x: -25, y: 40}

@@ -1,6 +1,5 @@
-﻿using Cinemachine;
-using Configs.PlayerConfig;
-using Game.CameraSystem.Installers;
+﻿using Configs.PlayerConfig;
+using Unity.Cinemachine;
 using UnityEngine;
 using Zenject;
 
@@ -16,30 +15,28 @@ namespace Game.CameraSystem.Components
         private float middleRadius;
 
         private float zoomFactor;
-        private Cinemachine3rdPersonFollow transposer;
+        private CinemachineThirdPersonFollow transposer;
 
         public float ZoomFactor => zoomFactor;
         
         public void HandleCameraZoom(CameraSetup currentCamera)
         {
-            if (currentCamera.GameCameraType == GameCameraType.CharacterCombat) return;
-            
-            switch (currentCamera.Cinemachine)
-            {
-                case CinemachineVirtualCamera virtualCamera:
-                {
-                    VirtualCameraZoom(virtualCamera);
-                    break;
-                }
-                case CinemachineFreeLook freeLook:
-                {
-                    FreeLookCameraZoom(freeLook);
-                    break;
-                }
-            }
+            // switch (currentCamera.Cinemachine.)
+            // {
+            //     case CinemachineCamera virtualCamera:
+            //     {
+            //         VirtualCameraZoom(virtualCamera);
+            //         break;
+            //     }
+            //     case CinemachineCamera freeLook:
+            //     {
+            //         FreeLookCameraZoom(freeLook);
+            //         break;
+            //     }
+            // }
         }
 
-        private void VirtualCameraZoom(CinemachineVirtualCamera virtualCamera)
+        private void VirtualCameraZoom(CinemachineCamera virtualCamera)
         {
             if (Input.mouseScrollDelta.y != 0)
             {
@@ -54,7 +51,6 @@ namespace Game.CameraSystem.Components
 
             if (transposer == null)
             {
-                transposer = virtualCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
                 if (transposer == null) return;
             }
 

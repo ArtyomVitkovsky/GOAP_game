@@ -13,7 +13,6 @@ namespace Game.CameraSystem
     {
         Character = 0,
         Vehicle = 1,
-        CharacterCombat = 2
     }
 
     public class CameraSystem : MonoBehaviour
@@ -24,7 +23,6 @@ namespace Game.CameraSystem
 
         [Inject] private CameraZoomComponent zoomComponent;
         [Inject] private CameraRayCastComponent rayCastComponent;
-        [Inject] private CombatCameraComponent combatCameraComponent;
 
         [Inject] private List<CameraSetup> cameraSetups;
 
@@ -49,9 +47,6 @@ namespace Game.CameraSystem
             tickableService.AddUpdateTickable(new TickableEntity(Control));
 
             rayCastComponent.Initialize();
-
-            var combatCamera = cameraSetups.FirstOrDefault(c => c.GameCameraType == GameCameraType.CharacterCombat);
-            combatCameraComponent.Initialize(combatCamera);
         }
 
         public void ChangeCamera(GameCameraType gameCameraType)
@@ -72,7 +67,6 @@ namespace Game.CameraSystem
         {
             zoomComponent.HandleCameraZoom(currentCamera);
             rayCastComponent.Raycast();
-            combatCameraComponent.ProcessAimingRotation(currentCamera);
         }
 
         private void OnDestroy()

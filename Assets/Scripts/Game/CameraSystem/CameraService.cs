@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.Cinemachine;
 using Zenject;
 
 namespace Game.CameraSystem
@@ -8,6 +9,8 @@ namespace Game.CameraSystem
         [Inject] private SignalBus _signalBus;
 
         private Queue<CameraSystem> CameraSystems;
+
+        public CinemachineVirtualCameraBase CurrentCinemachineCamera { get; private set; }
 
         public void Bootstrap()
         {
@@ -29,6 +32,7 @@ namespace Game.CameraSystem
             if (CameraSystems.TryPeek(out var cameraSystem))
             {
                 cameraSystem.ChangeCamera(gameCameraType);
+                CurrentCinemachineCamera = cameraSystem.CurrentCamera.Cinemachine;
                 return cameraSystem.CurrentCamera;
             }
 

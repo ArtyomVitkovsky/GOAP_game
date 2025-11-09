@@ -23,6 +23,9 @@ namespace Configs.PlayerConfig
 
         [Header("Look")] 
         [SerializeField] private float lookMultiplier;
+        [SerializeField] private Vector2 lookSensitivity;
+        [SerializeField] private Vector2 lookSmoothing;
+        [SerializeField] private Vector2 clampInDegrees = new Vector2(360, 180);
         [SerializeField] private float rigLookSpeed;
         [SerializeField] private Vector2 cameraVerticalClampMin;
         [SerializeField] private Vector2 cameraVerticalClampMax;
@@ -34,6 +37,9 @@ namespace Configs.PlayerConfig
         
         
         public float LookMultiplier => lookMultiplier;
+        public Vector2 LookSensitivity => lookSensitivity;
+        public Vector2 LookSmoothing => lookSmoothing;
+        public Vector2 ClampInDegrees => clampInDegrees;
         public float RigLookSpeed => rigLookSpeed;
 
         public int MaxBounces => maxBounces;
