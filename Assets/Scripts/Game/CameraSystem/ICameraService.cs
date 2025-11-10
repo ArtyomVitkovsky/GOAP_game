@@ -1,7 +1,10 @@
-﻿namespace Game.CameraSystem
+﻿using Unity.Cinemachine;
+
+namespace Game.CameraSystem
 {
     public interface ICameraService
     {
+        public CinemachineVirtualCameraBase CurrentCinemachineCamera { get; }
         public void Bootstrap();
         public void EnqueueCameraSystem(CameraSystem cameraSystem);
         public void DequeueCameraSystem();

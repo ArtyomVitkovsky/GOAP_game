@@ -1,8 +1,6 @@
-using Cinemachine;
 using Cysharp.Threading.Tasks;
 using Game.CameraSystem;
 using Game.Character.Components;
-using Game.Character.Installers;
 using Game.NpcSystem;
 using Services;
 using Services.PlayerControlService;
@@ -18,7 +16,6 @@ namespace Game.Character
         [Inject] private ICameraService cameraService;
         
         [Inject] private CharacterControlComponent characterControl;
-        // [Inject] private CharacterAnimationComponent animationComponent;
         [Inject] private CharacterInteractionComponent interactionComponent;
         [Inject] private CharacterCombatComponent combatComponent;
 

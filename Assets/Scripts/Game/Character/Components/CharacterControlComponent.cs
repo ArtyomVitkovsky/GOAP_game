@@ -1,12 +1,10 @@
-﻿using Cinemachine;
-using Configs.PlayerConfig;
+﻿using Configs.PlayerConfig;
 using Game.CameraSystem;
 using Game.CameraSystem.Components;
 using Game.CameraSystem.Installers;
-using Game.Car.Installers;
 using Game.Character.Installers;
 using Services.PlayerControlService;
-using Services.TickableService;
+using Unity.Cinemachine;
 using UnityEngine;
 using Zenject;
 
@@ -50,15 +48,10 @@ namespace Game.Character.Components
         [Inject(Id = CameraSystemInstaller.GAMEPLAY_CAMERA)]
         private Camera camera;
 
-        private CinemachineExternalCamera externalCamera;
-
-        private float cameraRotation;
-        private Quaternion bodyRotation;
-
-        private Quaternion gunRotation;
-
         private Collider[] ground = new Collider[1];
         private Vector3 moveVector;
+
+        private float bodyRotation;
         private float verticalVelocity = 0;
         private float jumpTimeoutDelta;
         private float fallTimeoutDelta;
@@ -71,6 +64,8 @@ namespace Game.Character.Components
 
         public void Initialize()
         {
+            targetDirection = Transform.localRotation.eulerAngles;
+            targetCharacterDirection = characterController.transform.localRotation.eulerAngles;
         }
 
         public void Control()
@@ -87,12 +82,10 @@ namespace Game.Character.Components
 
         private void OnAimStart()
         {
-            cameraService.RequestCameraTypeChange(GameCameraType.CharacterCombat);
         }
 
         private void OnAimEnd()
         {
-            cameraService.RequestCameraTypeChange(GameCameraType.Character);
         }
 
         private void ProcessMovement()
@@ -101,20 +94,20 @@ namespace Game.Character.Components
                 ? movementStats.SprintSpeed
                 : movementStats.MoveSpeed;
 
-            var input = PlayerActionsProvider.MoveVector;
+            var inputVector = new Vector3(PlayerActionsProvider.MoveVector.x, 0, PlayerActionsProvider.MoveVector.y);
+            var directionVector = Transform.TransformDirection(inputVector);
 
-            var forward = camera.transform.forward;
-            var right = camera.transform.right;
-
-            forward.y = 0;
-            right.y = 0;
-            forward.Normalize();
-            right.Normalize();
-
-            Vector3 moveDir = (right * input.x + forward * input.y).normalized;
-
-            moveVector = moveDir * speed;
-            moveVector.y = verticalVelocity;
+            moveVector = new Vector3(
+                directionVector.x * speed,
+                verticalVelocity,
+                directionVector.z * speed
+            );
+            
+            var rayStart = Transform.position;
+            rayStart.y += 0.5f;
+            var rayDir = moveVector;
+            rayDir.y = rayStart.y;
+            Debug.DrawRay(rayStart, rayDir, Color.yellow);
         }
 
         private void ProcessGravity()
@@ -154,24 +147,59 @@ namespace Game.Character.Components
             }
         }
 
+        
+        private Vector2 targetDirection;
+        private Vector2 targetCharacterDirection;
+        private Vector2 smoothMouse;
+        private Vector2 mouseDelta;
+        private Vector2 mouseAbsolute;
+        
         private void ProcessRotation()
         {
-            if (PlayerActionsProvider.MoveVector.sqrMagnitude > 0)
-            {
-                bodyRotation = Quaternion.Euler(camera.transform.rotation.eulerAngles.y * Vector3.up);
+            var targetOrientation = Quaternion.Euler(targetDirection);
+            var targetCharacterOrientation = Quaternion.Euler(targetCharacterDirection);
 
-                characterController.transform.rotation = Quaternion.Lerp(
-                    characterController.transform.rotation,
-                    bodyRotation,
-                    Time.deltaTime * movementStats.LookMultiplier);
+            mouseDelta = PlayerActionsProvider.LookVector;
+
+            mouseDelta = Vector2.Scale(
+                mouseDelta,
+                new Vector2(
+                    movementStats.LookSensitivity.x * movementStats.LookSmoothing.x,
+                    movementStats.LookSensitivity.y * movementStats.LookSmoothing.y)
+            );
+
+            smoothMouse.x = Mathf.Lerp(smoothMouse.x, mouseDelta.x, 1f / movementStats.LookSmoothing.x);
+            smoothMouse.y = Mathf.Lerp(smoothMouse.y, mouseDelta.y, 1f / movementStats.LookSmoothing.y);
+            
+            mouseAbsolute += smoothMouse;
+
+            if (movementStats.ClampInDegrees.x < 360)
+            {
+                mouseAbsolute.x = Mathf.Clamp(
+                    mouseAbsolute.x,
+                    -movementStats.ClampInDegrees.x * 0.5f,
+                    movementStats.ClampInDegrees.x * 0.5f);
             }
+            if (movementStats.ClampInDegrees.y < 360)
+            {
+                mouseAbsolute.y = Mathf.Clamp(
+                    mouseAbsolute.y,
+                    -movementStats.ClampInDegrees.y * 0.5f,
+                    movementStats.ClampInDegrees.y * 0.5f);
+            }
+            
+            cameraService.CurrentCinemachineCamera.transform.localRotation = 
+                Quaternion.AngleAxis(-mouseAbsolute.y, targetOrientation * Vector3.right) * targetOrientation;
+            
+            var yRotation = Quaternion.AngleAxis(mouseAbsolute.x, Vector3.up);
+            Transform.localRotation = yRotation * targetCharacterOrientation;
         }
 
         private void Move()
         {
             moveVector = CollideAndSlide(
                 moveVector,
-                characterController.transform.position,
+                Transform.position,
                 0,
                 false
                 , moveVector
@@ -179,7 +207,7 @@ namespace Game.Character.Components
 
             moveVector += CollideAndSlide(
                 Gravity,
-                characterController.transform.position + moveVector,
+                Transform.position + moveVector,
                 0,
                 true,
                 Gravity);
@@ -292,7 +320,7 @@ namespace Game.Character.Components
         {
             float height = characterController.height;
             float radius = characterController.radius;
-            Vector3 center = characterController.transform.position + characterController.center;
+            Vector3 center = Transform.position + characterController.center;
 
             Vector3 bottom = center + Vector3.down * (height / 2 - radius);
             Vector3 top = center + Vector3.up * (height / 2 - radius);

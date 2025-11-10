@@ -1,5 +1,4 @@
 using System;
-using Cinemachine;
 using Cysharp.Threading.Tasks;
 using Game.CameraSystem;
 using Game.Car.Components;
